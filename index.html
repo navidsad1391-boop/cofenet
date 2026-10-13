@@ -2,221 +2,155 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سیستم ثبت اطلاعات مشتریان - کافی نت رز</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کافی نت رز - سیستم مدیریت مشتریان</title>
     <style>
-        * { box-sizing: border-box; font-family: Tahoma, 'Segoe UI', sans-serif; }
-        body { background: #f0f2f5; margin: 0; padding: 20px; direction: rtl; }
+        * { box-sizing: border-box; font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background: #f0f2f5; direction: rtl; min-height: 100vh; }
+
+        /* صفحه ورود */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-overlay.hidden { display: none; }
+        .login-box {
+            background: white; padding: 35px; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; text-align: center;
+        }
+        .login-box .logo { font-size: 45px; margin-bottom: 5px; }
+        .login-box h2 { color: #880e4f; margin-bottom: 5px; font-size: 20px; }
+        .login-box p { color: #777; font-size: 12px; margin-bottom: 20px; line-height: 1.6; }
+        .login-box input {
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+            outline: none; text-align: center; direction: ltr;
+        }
+        .login-box input:focus { border-color: #e91e63; }
+        .btn-login {
+            width: 100%; padding: 12px; background: linear-gradient(135deg, #e91e63, #880e4f);
+            color: white; border: none; border-radius: 8px; font-size: 15px;
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .login-error { color: #f44336; font-size: 12px; margin-top: 10px; display: none; font-weight: bold; }
+
+        /* صفحه اصلی */
+        .main-app { display: none; padding: 20px; }
+        .main-app.show { display: block; }
         .container { max-width: 1200px; margin: auto; }
-        .header { background: linear-gradient(135deg, #e91e63, #880e4f); color: white; padding: 18px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 20px; }
-        .header h2 { margin: 0; font-size: 22px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .header {
+            background: linear-gradient(135deg, #e91e63, #880e4f); color: white;
+            padding: 15px 20px; border-radius: 12px; display: flex;
+            justify-content: space-between; align-items: center;
+            margin-bottom: 15px; flex-wrap: wrap; gap: 10px;
+        }
+        .header h2 { font-size: 18px; margin: 0; }
+        .header-btns { display: flex; gap: 8px; }
+        .btn-excel { background: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-logout { background: #d32f2f; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        
+        .status-tag { background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-align: center; border: 1px solid #c8e6c9; }
+        .status-tag.syncing { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
+
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #444; }
-        .form-group input, .form-group select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; transition: 0.2s; }
-        .form-group input:focus, .form-group select:focus { border-color: #e91e63; box-shadow: 0 0 5px rgba(233,30,99,0.3); }
-        .btn-submit { background: #e91e63; color: white; border: none; padding: 12px 25px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; margin-top: 15px; }
+        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #444; }
+        .form-group input, .form-group select { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #e91e63; }
+        .btn-submit { background: #e91e63; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; }
         .btn-submit:hover { background: #c2185b; }
-        .btn-excel { background: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .search-box { width: 100%; padding: 12px; border: 2px solid #e91e63; border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #eee; text-align: center; font-size: 13px; }
+        
+        .search-box { width: 100%; padding: 10px; border: 2px solid #e91e63; border-radius: 6px; font-size: 13px; margin-bottom: 15px; outline: none; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 10px; border: 1px solid #eee; text-align: center; font-size: 12px; }
         th { background: #fce4ec; color: #880e4f; }
         tr:hover { background: #fafafa; }
-        .copy-btn { background: #e0e0e0; border: none; padding: 3px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 4px; transition: 0.2s; }
-        .copy-btn:hover { background: #bdbdbd; }
-        .copy-btn.copied { background: #4caf50; color: white; }
-        .del-btn { background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .copy-btn { background: #eee; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; margin-right: 3px; }
+        .copy-btn.copied { background: #4caf50; color: white; border-color: #4caf50; }
+        .del-btn { background: #f44336; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .badge { padding: 2px 6px; border-radius: 10px; font-size: 11px; }
         .badge-yes { background: #e8f5e9; color: #2e7d32; }
         .badge-no { background: #ffebee; color: #c62828; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h2>🌹 کافی نت رز - سیستم ثبت و بایگانی اطلاعات مشتریان</h2>
-        <button class="btn-excel" onclick="exportToCSV()">📥 دانلود فایل اکسل (پشتیبان)</button>
-    </div>
-
-    <!-- فرم ورودی اطلاعات -->
-    <div class="card">
-        <h3 style="margin-top:0; color:#333;">➕ ثبت اطلاعات مشتری جدید</h3>
-        <form id="customerForm" onsubmit="saveCustomer(event)">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>نام و نام خانوادگی:</label>
-                    <input type="text" id="fullName" required placeholder="مثال: علی محمدی">
-                </div>
-                <div class="form-group">
-                    <label>کد ملی (۱۰ رقم):</label>
-                    <input type="text" id="nationalCode" maxlength="10" required placeholder="مثال: 0012345678">
-                </div>
-                <div class="form-group">
-                    <label>شماره تماس همراه:</label>
-                    <input type="text" id="phone" maxlength="11" required placeholder="مثال: 09123456789">
-                </div>
-                <div class="form-group">
-                    <label>کد پستی (۱۰ رقم):</label>
-                    <input type="text" id="postalCode" maxlength="10" placeholder="مثال: 1234567890">
-                </div>
-                <div class="form-group">
-                    <label>میزان درآمد ماهانه (تومان):</label>
-                    <input type="text" id="income" placeholder="مثال: 15,000,000">
-                </div>
-                <div class="form-group">
-                    <label>وضعیت مسکن (به نام دارد؟):</label>
-                    <select id="hasHouse">
-                        <option value="ندارد">فاقد مسکن (ندارد)</option>
-                        <option value="دارد">مسکن دارد</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>وضعیت خودرو (به نام دارد؟):</label>
-                    <select id="hasCar">
-                        <option value="ندارد">فاقد خودرو (ندارد)</option>
-                        <option value="دارد">خودرو دارد</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>توضیحات یا رمز سامانه (اختیاری):</label>
-                    <input type="text" id="notes" placeholder="رمز سخا یا نکته خاص">
-                </div>
-            </div>
-            <button type="submit" class="btn-submit">💾 ثبت و ذخیره مشتری</button>
-        </form>
-    </div>
-
-    <!-- جدول نمایش مشتریان با قابلیت جستجو و کپی -->
-    <div class="card">
-        <input type="text" id="searchBox" class="search-box" onkeyup="filterCustomers()" placeholder="🔍 جستجو بر اساس نام یا کد ملی...">
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ردیف</th>
-                        <th>نام و نام خانوادگی</th>
-                        <th>کد ملی</th>
-                        <th>شماره همراه</th>
-                        <th>کد پستی</th>
-                        <th>درآمد</th>
-                        <th>ملک</th>
-                        <th>خودرو</th>
-                        <th>توضیحات</th>
-                        <th>عملیات</th>
-                    </tr>
-                </thead>
-                <tbody id="customerTableBody">
-                    <!-- داده‌ها با جاوااسکریپت پر می‌شوند -->
-                </tbody>
-            </table>
-        </div>
+<!-- صفحه ورود و اتصال به گیت هاب -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <div class="logo">🌹</div>
+        <h2>ورود به کافی نت رز</h2>
+        <p>توکن دسترسی گیت‌هاب (Personal Token) را وارد کنید تا اطلاعات مستقیماً در مخزن گیت‌هاب ذخیره شوند و هرگز پاک نشوند:</p>
+        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+        <button class="btn-login" onclick="loginWithGithub()">🔓 ورود و اتصال به سرور گیت‌هاب</button>
+        <div class="login-error" id="loginError">❌ توکن نامعتبر است یا دسترسی ندارد!</div>
     </div>
 </div>
 
-<script>
-    let customers = JSON.parse(localStorage.getItem('rose_customers')) || [];
+<!-- صفحه اصلی -->
+<div class="main-app" id="mainApp">
+    <div class="container">
+        <div class="header">
+            <h2>🌹 کافی نت رز - سیستم ذخیره‌سازی ابری گیت‌هاب</h2>
+            <div class="header-btns">
+                <button class="btn-excel" onclick="exportToCSV()">📥 خروجی اکسل</button>
+                <button class="btn-logout" onclick="logout()">🚪 خروج</button>
+            </div>
+        </div>
 
-    function saveCustomer(e) {
-        e.preventDefault();
-        const customer = {
-            id: Date.now(),
-            name: document.getElementById('fullName').value.trim(),
-            nationalCode: document.getElementById('nationalCode').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            postalCode: document.getElementById('postalCode').value.trim() || '---',
-            income: document.getElementById('income').value.trim() || '---',
-            hasHouse: document.getElementById('hasHouse').value,
-            hasCar: document.getElementById('hasCar').value,
-            notes: document.getElementById('notes').value.trim() || '---'
-        };
+        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - تمام اطلاعات به صورت ابری و دائمی ذخیره می‌شوند</div>
 
-        customers.unshift(customer);
-        localStorage.setItem('rose_customers', JSON.stringify(customers));
-        document.getElementById('customerForm').reset();
-        renderTable();
-    }
+        <!-- فرم ثبت -->
+        <div class="card">
+            <h4 style="margin-bottom:12px; color:#333;">➕ ثبت مشتری جدید</h4>
+            <form id="customerForm" onsubmit="saveCustomer(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>نام و نام خانوادگی:</label>
+                        <input type="text" id="fullName" required placeholder="علی محمدی">
+                    </div>
+                    <div class="form-group">
+                        <label>کد ملی (۱۰ رقم):</label>
+                        <input type="text" id="nationalCode" maxlength="10" required placeholder="0012345678">
+                    </div>
+                    <div class="form-group">
+                        <label>شماره همراه:</label>
+                        <input type="text" id="phone" maxlength="11" required placeholder="09123456789">
+                    </div>
+                    <div class="form-group">
+                        <label>کد پستی (۱۰ رقم):</label>
+                        <input type="text" id="postalCode" maxlength="10" placeholder="1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label>درآمد ماهانه:</label>
+                        <input type="text" id="income" placeholder="مثلاً: 15 میلیون">
+                    </div>
+                    <div class="form-group">
+                        <label>وضعیت مسکن:</label>
+                        <select id="hasHouse">
+                            <option value="ندارد">فاقد مسکن</option>
+                            <option value="دارد">مسکن دارد</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>وضعیت خودرو:</label>
+                        <select id="hasCar">
+                            <option value="ندارد">فاقد خودرو</option>
+                            <option value="دارد">خودرو دارد</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات / رمز سامانه:</label>
+                        <input type="text" id="notes" placeholder="رمز سخا و...">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">💾 ذخیره در گیت‌هاب</button>
+            </form>
+        </div>
 
-    function renderTable(data = customers) {
-        const tbody = document.getElementById('customerTableBody');
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" style="padding:20px; color:#888;">هیچ رکوردی یافت نشد.</td></tr>`;
-            return;
-        }
-
-        data.forEach((c, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td><b>${c.name}</b> <button class="copy-btn" onclick="copyText('${c.name}', this)">کپی</button></td>
-                <td><code>${c.nationalCode}</code> <button class="copy-btn" onclick="copyText('${c.nationalCode}', this)">کپی</button></td>
-                <td><code>${c.phone}</code> <button class="copy-btn" onclick="copyText('${c.phone}', this)">کپی</button></td>
-                <td><code>${c.postalCode}</code> ${c.postalCode !== '---' ? `<button class="copy-btn" onclick="copyText('${c.postalCode}', this)">کپی</button>` : ''}</td>
-                <td>${c.income}</td>
-                <td><span class="badge ${c.hasHouse === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasHouse}</span></td>
-                <td><span class="badge ${c.hasCar === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasCar}</span></td>
-                <td style="color:#666;">${c.notes}</td>
-                <td><button class="del-btn" onclick="deleteCustomer(${c.id})">حذف</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function copyText(text, btn) {
-        navigator.clipboard.writeText(text).then(() => {
-            const originalText = btn.innerText;
-            btn.innerText = '✓ کپی شد';
-            btn.classList.add('copied');
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.classList.remove('copied');
-            }, 1000);
-        });
-    }
-
-    function deleteCustomer(id) {
-        if (confirm('آیا از حذف این مورد اطمینان دارید؟')) {
-            customers = customers.filter(c => c.id !== id);
-            localStorage.setItem('rose_customers', JSON.stringify(customers));
-            renderTable();
-        }
-    }
-
-    function filterCustomers() {
-        const query = document.getElementById('searchBox').value.toLowerCase();
-        const filtered = customers.filter(c => 
-            c.name.toLowerCase().includes(query) || 
-            c.nationalCode.includes(query) ||
-            c.phone.includes(query)
-        );
-        renderTable(filtered);
-    }
-
-    function exportToCSV() {
-        if (customers.length === 0) {
-            alert('هیچ اطلاعاتی برای ذخیره وجود ندارد.');
-            return;
-        }
-        let csvContent = "\uFEFF"; // UTF-8 BOM for Excel Persian support
-        csvContent += "نام,کد ملی,تلفن,کد پستی,درآمد,ملک,خودرو,توضیحات\n";
-
-        customers.forEach(c => {
-            csvContent += `"${c.name}","${c.nationalCode}","${c.phone}","${c.postalCode}","${c.income}","${c.hasHouse}","${c.hasCar}","${c.notes}"\n`;
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `پشتیبان_کافی_نت_رز_${new Date().toLocaleDateString('fa-IR')}.csv`;
-        link.click();
-    }
-
-    // لود اولیه جدول
-    renderTable();
-</script>
-
-</body>
-</html>
+        <!-- جدول مشتریان -->
+        <div class="card">
+            <input type="text" 
