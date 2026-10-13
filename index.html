@@ -4,49 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم جامع کافی نت رز</title>
+    <!-- کتابخانه‌های پردازش و مهر زدن روی PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         body { background: #f0f2f5; direction: rtl; min-height: 100vh; padding-bottom: 40px; }
 
-        /* ===== صفحه ورود / تنظیم رمز ===== */
-        .auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
+        /* ===== صفحه ورود ===== */
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .auth-overlay.hidden { display: none; }
-        .auth-box {
-            background: white; padding: 35px; border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.35); width: 380px; text-align: center;
-        }
+        .auth-box { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); width: 380px; text-align: center; }
         .auth-box .logo { font-size: 50px; margin-bottom: 5px; }
         .auth-box h2 { color: #880e4f; margin-bottom: 10px; font-size: 22px; }
         .auth-box p { color: #666; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-        .auth-box input {
-            width: 100%; padding: 12px; border: 2px solid #ddd;
-            border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; text-align: center;
-        }
+        .auth-box input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; text-align: center; }
         .auth-box input:focus { border-color: #e91e63; }
-        .btn-auth {
-            width: 100%; padding: 12px; background: linear-gradient(135deg, #e91e63, #880e4f);
-            color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer;
-        }
+        .btn-auth { width: 100%; padding: 12px; background: linear-gradient(135deg, #e91e63, #880e4f); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
         .auth-error { color: #f44336; font-size: 13px; margin-top: 10px; display: none; font-weight: bold; }
 
         /* ===== صفحه اصلی ===== */
         .main-app { display: none; padding: 20px; }
         .main-app.show { display: block; }
-        .container { max-width: 1200px; margin: auto; }
-        .header {
-            background: linear-gradient(135deg, #e91e63, #880e4f); color: white;
-            padding: 18px 25px; border-radius: 12px; display: flex;
-            justify-content: space-between; align-items: center; margin-bottom: 15px;
-            flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+        .container { max-width: 1250px; margin: auto; }
+        .header { background: linear-gradient(135deg, #e91e63, #880e4f); color: white; padding: 18px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .header h2 { font-size: 20px; margin: 0; }
         .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-header { color: white; border: none; padding: 9px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
         .btn-excel { background: #2e7d32; }
+        .btn-stamp-pdf { background: #6a1b9a; }
         .btn-print-blank { background: #0288d1; }
         .btn-logout { background: #d32f2f; }
 
@@ -55,89 +41,68 @@
 
         .card { background: white; padding: 22px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px; }
         .card h3 { margin-bottom: 15px; color: #333; font-size: 16px; border-bottom: 2px solid #fce4ec; padding-bottom: 8px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #444; }
         .form-group input, .form-group select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; }
         .form-group input:focus, .form-group select:focus { border-color: #e91e63; box-shadow: 0 0 5px rgba(233,30,99,0.2); }
         
-        .file-upload-box {
-            grid-column: 1 / -1; background: #fafafa; border: 2px dashed #e91e63;
-            padding: 15px; border-radius: 8px; text-align: center; cursor: pointer;
-        }
+        .file-upload-box { grid-column: 1 / -1; background: #fafafa; border: 2px dashed #e91e63; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; }
         .file-upload-box input { display: none; }
         .preview-thumbs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .preview-thumb-wrapper { position: relative; display: inline-block; }
         .preview-thumb { width: 65px; height: 65px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd; }
         .remove-img-btn { position: absolute; top: -5px; right: -5px; background: #f44336; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; cursor: pointer; }
 
-        .btn-submit {
-            background: #e91e63; color: white; border: none; padding: 12px 25px;
-            font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer;
-            flex: 1; transition: 0.2s;
-        }
+        .btn-submit { background: #e91e63; color: white; border: none; padding: 12px 25px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; flex: 1; transition: 0.2s; }
         .btn-submit:hover { background: #c2185b; }
-        .btn-cancel-edit {
-            background: #757575; color: white; border: none; padding: 12px 20px;
-            font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; display: none;
-        }
+        .btn-cancel-edit { background: #757575; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; display: none; }
         
         .search-box { width: 100%; padding: 12px; border: 2px solid #e91e63; border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px 8px; border: 1px solid #eee; text-align: center; font-size: 12px; }
+        th, td { padding: 8px 5px; border: 1px solid #eee; text-align: center; font-size: 12px; }
         th { background: #fce4ec; color: #880e4f; }
         tr:hover { background: #fafafa; }
         .copy-btn { background: #eee; border: 1px solid #ccc; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 2px; }
-        .copy-btn.copied { background: #4caf50; color: white; border-color: #4caf50; }
-        .edit-btn-row { background: #f57c00; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .del-btn { background: #f44336; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .doc-btn { background: #7b1fa2; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .print-btn-row { background: #00897b; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-        .badge-yes { background: #e8f5e9; color: #2e7d32; }
-        .badge-no { background: #ffebee; color: #c62828; }
+        .action-btn { color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-bottom: 3px; display: inline-block; }
+        .btn-blue { background: #0288d1; } .btn-orange { background: #f57c00; } .btn-red { background: #f44336; } .btn-purple { background: #7b1fa2; } .btn-green { background: #00897b; }
+        
+        .debt-red { color: #d32f2f; font-weight: bold; background: #ffebee; padding: 4px 8px; border-radius: 4px; display: inline-block;}
+        .debt-green { color: #2e7d32; font-weight: bold; background: #e8f5e9; padding: 4px 8px; border-radius: 4px; display: inline-block;}
 
-        /* ===== مودال گالری مدارک ===== */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; justify-content: center;
-            align-items: center; z-index: 10000; padding: 20px;
-        }
+        /* ===== مودال‌ها ===== */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; }
         .modal.show { display: flex; }
-        .modal-content {
-            background: white; padding: 20px; border-radius: 12px;
-            max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; text-align: center;
-        }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
-        .gallery-item img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
-        .close-modal { background: #f44336; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight: bold; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .close-modal { background: #f44336; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight: bold; display: block; margin-left: auto; margin-right: auto; }
+        
+        .service-form { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e0e0e0; display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .service-form .form-group { flex: 1; min-width: 140px; }
+        .service-table th { background: #e3f2fd; color: #006064; }
+        .btn-add-service { background: #00897b; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; height: 38px;}
+        .toggle-pay-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; font-size: 12px;}
 
-        /* ===== استایل چاپ (A4) ===== */
+        /* استایل بخش مهر PDF */
+        .pdf-stamp-box { background: #f3e5f5; border: 2px dashed #8e24aa; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
+        .pdf-stamp-box input { display: none; }
+        .btn-pdf-select { background: #8e24aa; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+
+        /* ===== چاپ ===== */
         #printableArea { display: none; }
         @media print {
             body * { visibility: hidden; }
             #printableArea, #printableArea * { visibility: visible; }
-            #printableArea {
-                display: block !important; position: absolute; left: 0; top: 0;
-                width: 210mm; height: 297mm; padding: 8mm 10mm; background: white;
-            }
+            #printableArea { display: block !important; position: absolute; left: 0; top: 0; width: 210mm; height: 297mm; padding: 8mm 10mm; background: white; }
             @page { size: A4 portrait; margin: 0; }
             .a4-page { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
-            .slip-card {
-                border: 2px solid #000; border-radius: 16px; padding: 10px 15px;
-                position: relative; display: flex; flex-direction: row-reverse;
-                align-items: center; height: 62mm; background: #fff;
-            }
-            .slip-header {
-                width: 25%; text-align: center; border-left: 1.5px solid #000;
-                padding-left: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            }
+            .slip-card { border: 2px solid #000; border-radius: 16px; padding: 10px 15px; position: relative; display: flex; flex-direction: row-reverse; align-items: center; height: 62mm; background: #fff; }
+            .slip-header { width: 25%; text-align: center; border-left: 1.5px solid #000; padding-left: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
             .slip-header svg { width: 38px; height: 50px; fill: none; stroke: #000; stroke-width: 1.5; }
             .slip-header h2 { font-size: 18px; font-weight: bold; margin-top: 4px; color: #000; white-space: nowrap; }
             .slip-body { width: 75%; padding-right: 12px; display: flex; flex-direction: column; justify-content: space-around; height: 100%; }
             .slip-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
             .slip-field { font-size: 12px; font-weight: bold; color: #000; display: flex; align-items: center; }
-            .slip-field .line { display: inline-block; min-width: 100px; border-bottom: 1px solid #000; text-align: center; padding: 0 5px; font-weight: bold; font-size: 13px; }
+            .slip-field .line { display: inline-block; min-width: 80px; border-bottom: 1px solid #000; text-align: center; padding: 0 5px; font-weight: bold; font-size: 13px; }
             .slip-field .checkbox { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #000; margin: 0 4px; text-align: center; line-height: 12px; font-size: 11px; }
             .cut-line { text-align: center; border-bottom: 1.5px dashed #444; margin: 4mm 0; position: relative; height: 1px; }
             .cut-line span { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 8px; font-size: 14px; }
@@ -146,7 +111,7 @@
 </head>
 <body>
 
-<!-- ===== صفحه ورود ===== -->
+<!-- سیستم لاگین -->
 <div class="auth-overlay" id="authOverlay">
     <div class="auth-box">
         <div class="logo">🌹</div>
@@ -158,65 +123,35 @@
     </div>
 </div>
 
-<!-- ===== صفحه اصلی پنل ===== -->
+<!-- پنل اصلی -->
 <div class="main-app" id="mainApp">
     <div class="container">
         <div class="header">
-            <h2>🌹 کافی نت رز - سیستم مدیریت مشتریان</h2>
+            <h2>🌹 کافی نت رز - سیستم مدیریت و خدمات</h2>
             <div class="header-btns">
+                <button class="btn-header btn-stamp-pdf" onclick="openPdfModal()">📄 مهر زدن هوشمند روی PDF</button>
                 <button class="btn-header btn-print-blank" onclick="printBlankForms()">🖨️ چاپ فرم خام (۴ تایی)</button>
                 <button class="btn-header btn-excel" onclick="exportToCSV()">📥 دانلود اکسل</button>
                 <button class="btn-header btn-logout" onclick="logout()">🚪 خروج</button>
             </div>
         </div>
 
-        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - ذخیره ابری و خودکار اطلاعات فعال است</div>
+        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - ذخیره ابری اطلاعات فعال است</div>
 
-        <!-- فرم ثبت و ویرایش -->
+        <!-- فرم ثبت -->
         <div class="card">
-            <h3 id="formTitle">➕ ثبت مشخصات و مدارک مشتری جدید</h3>
+            <h3 id="formTitle">➕ ثبت مشخصات مشتری جدید</h3>
             <form id="customerForm" onsubmit="saveCustomer(event)">
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label>نام و نام خانوادگی:</label>
-                        <input type="text" id="fullName" required placeholder="مثال: علی محمدی">
-                    </div>
-                    <div class="form-group">
-                        <label>کد ملی (۱۰ رقم):</label>
-                        <input type="text" id="nationalCode" maxlength="10" required placeholder="0012345678">
-                    </div>
-                    <div class="form-group">
-                        <label>شماره تماس همراه:</label>
-                        <input type="text" id="phone" maxlength="11" required placeholder="09123456789">
-                    </div>
-                    <div class="form-group">
-                        <label>کد پستی (۱۰ رقم):</label>
-                        <input type="text" id="postalCode" maxlength="10" placeholder="1234567890">
-                    </div>
-                    <div class="form-group">
-                        <label>درآمد ماهانه (تومان):</label>
-                        <input type="text" id="income" placeholder="مثال: ۱۵ میلیون">
-                    </div>
-                    <div class="form-group">
-                        <label>وضعیت مسکن:</label>
-                        <select id="hasHouse">
-                            <option value="ندارد">فاقد مسکن</option>
-                            <option value="دارد">مسکن دارد</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>وضعیت خودرو:</label>
-                        <select id="hasCar">
-                            <option value="ندارد">فاقد خودرو</option>
-                            <option value="دارد">خودرو دارد</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>توضیحات / رمز سامانه:</label>
-                        <input type="text" id="notes" placeholder="رمز سخا یا سایر نکات">
-                    </div>
-
-                    <!-- آپلود عکس مدارک -->
+                    <div class="form-group"><label>نام و نام خانوادگی:</label><input type="text" id="fullName" required></div>
+                    <div class="form-group"><label>کد ملی:</label><input type="text" id="nationalCode" maxlength="10" required></div>
+                    <div class="form-group"><label>تاریخ تولد (شمسی):</label><input type="text" id="birthDate" placeholder="مثال: 1375/02/10"></div>
+                    <div class="form-group"><label>شماره همراه:</label><input type="text" id="phone" maxlength="11" required></div>
+                    <div class="form-group"><label>کد پستی:</label><input type="text" id="postalCode" maxlength="10"></div>
+                    <div class="form-group"><label>درآمد ماهانه (تومان):</label><input type="text" id="income"></div>
+                    <div class="form-group"><label>وضعیت مسکن:</label><select id="hasHouse"><option value="ندارد">فاقد مسکن</option><option value="دارد">مسکن دارد</option></select></div>
+                    <div class="form-group"><label>وضعیت خودرو:</label><select id="hasCar"><option value="ندارد">فاقد خودرو</option><option value="دارد">خودرو دارد</option></select></div>
+                    <div class="form-group"><label>توضیحات کلی:</label><input type="text" id="notes"></div>
                     <div class="file-upload-box" onclick="document.getElementById('docFiles').click()">
                         📷 <b>جهت افزودن عکس مدارک کلیک کنید</b>
                         <input type="file" id="docFiles" multiple accept="image/*" onchange="previewDocs(event)">
@@ -224,35 +159,25 @@
                     </div>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:15px;">
-                    <button type="submit" class="btn-submit" id="submitBtn">💾 ثبت و ذخیره‌سازی مشتری در گیت‌هاب</button>
+                    <button type="submit" class="btn-submit" id="submitBtn">💾 ثبت و ذخیره مشتری در گیت‌هاب</button>
                     <button type="button" class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">❌ انصراف از ویرایش</button>
                 </div>
             </form>
         </div>
 
-        <!-- جدول مشتریان -->
+        <!-- جدول -->
         <div class="card">
-            <input type="text" id="searchBox" class="search-box" onkeyup="filterCustomers()" placeholder="🔍 جستجو بر اساس نام، کد ملی یا شماره همراه...">
+            <input type="text" id="searchBox" class="search-box" onkeyup="filterCustomers()" placeholder="🔍 جستجو نام، کد ملی، شماره...">
             <div style="overflow-x:auto;">
                 <table>
                     <thead>
                         <tr>
-                            <th>ردیف</th>
-                            <th>نام و نام خانوادگی</th>
-                            <th>کد ملی</th>
-                            <th>شماره همراه</th>
-                            <th>کد پستی</th>
-                            <th>درآمد</th>
-                            <th>ملک</th>
-                            <th>خودرو</th>
-                            <th>توضیحات</th>
-                            <th>مدارک</th>
-                            <th>عملیات</th>
+                            <th>نام</th><th>کد ملی</th><th>تولد</th><th>موبایل</th>
+                            <th>کد پستی</th><th>درآمد / مسکن / خودرو</th><th>وضعیت مالی</th>
+                            <th style="min-width: 160px;">عملیات و سوابق</th>
                         </tr>
                     </thead>
-                    <tbody id="customerTableBody">
-                        <tr><td colspan="11" style="padding:20px; color:#888;">در حال دریافت اطلاعات...</td></tr>
-                    </tbody>
+                    <tbody id="customerTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -261,16 +186,62 @@
 
 <div id="printableArea"></div>
 
+<!-- مودال مهر هوشمند PDF -->
+<div class="modal" id="pdfStampModal">
+    <div class="modal-content">
+        <h3 style="color:#6a1b9a; text-align:center; margin-bottom:15px;">📄 مهر زدن هوشمند روی PDF (جستجوی جاخالی)</h3>
+        <div class="pdf-stamp-box">
+            <p style="margin-bottom:15px; font-size:13px; color:#555;">
+                فایل PDF (ثبت نام، سخا، خودرو و...) را انتخاب کنید. سیستم به صورت خودکار **سفیدترین جای خالی** صفحه را پیدا کرده و مهر «کافی‌نت رز» را روی آن می‌زند.
+            </p>
+            <button class="btn-pdf-select" onclick="document.getElementById('pdfFileInput').click()">📌 انتخاب فایل PDF</button>
+            <input type="file" id="pdfFileInput" accept="application/pdf" onchange="autoStampPdf(event)">
+        </div>
+        <div id="pdfStatus" style="text-align:center; font-weight:bold; color:#4a148c; margin-top:10px;"></div>
+        <button class="close-modal" onclick="closeModal('pdfStampModal')">بستن</button>
+    </div>
+</div>
+
 <!-- مودال مدارک -->
 <div class="modal" id="docModal">
     <div class="modal-content">
-        <h3 id="modalTitle">مدارک مشتری</h3>
+        <h3 id="modalTitle" style="text-align:center; margin-bottom:15px;">مدارک</h3>
         <div class="gallery-grid" id="modalGallery"></div>
-        <button class="close-modal" onclick="closeModal()">بستن گالری</button>
+        <button class="close-modal" onclick="closeModal('docModal')">بستن گالری</button>
+    </div>
+</div>
+
+<!-- مودال سوابق و مالی -->
+<div class="modal" id="financeModal">
+    <div class="modal-content">
+        <h3 id="financeTitle" style="color:#006064; margin-bottom:10px; border-bottom:2px solid #b2ebf2; padding-bottom:10px;">سوابق و امور مالی</h3>
+        <div class="service-form">
+            <div class="form-group"><label>شرح کار انجام شده:</label><input type="text" id="srvDesc" placeholder="مثال: ثبت نام وام"></div>
+            <div class="form-group"><label>مبلغ (تومان):</label><input type="number" id="srvPrice" placeholder="مثال: 50000"></div>
+            <div class="form-group">
+                <label>وضعیت پرداخت:</label>
+                <select id="srvStatus">
+                    <option value="true">✅ پرداخت شد (تسویه)</option>
+                    <option value="false">❌ پرداخت نشد (بدهکار)</option>
+                </select>
+            </div>
+            <button class="btn-add-service" onclick="addService()">➕ ثبت کار جدید</button>
+        </div>
+
+        <table class="service-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+            <thead><tr><th>تاریخ</th><th>شرح کار</th><th>مبلغ</th><th>تغییر وضعیت پرداخت</th><th>حذف</th></tr></thead>
+            <tbody id="financeTableBody"></tbody>
+        </table>
+        
+        <h3 id="totalDebtDisplay" style="text-align:left; margin-top:15px; color:#d32f2f;">جمع کل بدهی: 0 تومان</h3>
+        <button class="close-modal" onclick="closeModal('financeModal')">بازگشت</button>
     </div>
 </div>
 
 <script>
+    // تنظیمات PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
     const TOKEN = "ghp_WdHnTsXEK" + "5l9TKDVFGsmey" + "jaxHucJ337gIjG";
     const REPO_OWNER = "navidsad1391-boop";
     const REPO_NAME = "cofenet";
@@ -279,408 +250,399 @@
     let customers = [];
     let fileSHA = "";
     let tempDocImages = [];
-    let editingCustomerId = null; // آیدی مشتری در حال ویرایش
+    let editingCustomerId = null;
+    let activeFinanceCustomerId = null;
 
-    // سیستم لاگین
+    function getPersianDate() { return new Date().toLocaleDateString('fa-IR'); }
+    function formatMoney(number) { return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
     const savedPass = localStorage.getItem('rose_custom_pass');
-    if (!savedPass) {
-        document.getElementById('authTitle').innerText = '🔑 تعیین رمز عبور جدید';
-        document.getElementById('authDesc').innerText = 'لطفاً یک رمز عبور دلخواه برای سیستم خود تعیین کنید:';
-        document.getElementById('authBtn').innerText = '💾 ثبت رمز و ورود';
-    }
+    if (!savedPass) { document.getElementById('authTitle').innerText = '🔑 تعیین رمز عبور'; document.getElementById('authBtn').innerText = '💾 ثبت رمز'; }
 
     function handleAuth() {
         const inputPass = document.getElementById('authPassword').value.trim();
-        const err = document.getElementById('authError');
-        if (!inputPass) { err.innerText = '❌ لطفاً رمز عبور را وارد کنید!'; err.style.display = 'block'; return; }
-
+        if (!inputPass) return;
         const currentSavedPass = localStorage.getItem('rose_custom_pass');
-        if (!currentSavedPass) {
+        if (!currentSavedPass || inputPass === currentSavedPass) {
             localStorage.setItem('rose_custom_pass', inputPass);
             sessionStorage.setItem('rose_logged_in', 'true');
             showApp();
-        } else if (inputPass === currentSavedPass) {
-            sessionStorage.setItem('rose_logged_in', 'true');
-            showApp();
         } else {
-            err.innerText = '❌ رمز عبور اشتباه است!';
-            err.style.display = 'block';
+            document.getElementById('authError').style.display = 'block';
         }
     }
 
-    function showApp() {
-        document.getElementById('authOverlay').classList.add('hidden');
-        document.getElementById('mainApp').classList.add('show');
-        loadFromGithub();
-    }
-
+    function showApp() { document.getElementById('authOverlay').classList.add('hidden'); document.getElementById('mainApp').classList.add('show'); loadFromGithub(); }
     if (sessionStorage.getItem('rose_logged_in') === 'true') showApp();
+    function logout() { sessionStorage.removeItem('rose_logged_in'); location.reload(); }
 
-    function logout() {
-        sessionStorage.removeItem('rose_logged_in');
-        location.reload();
+    function openPdfModal() { document.getElementById('pdfStampModal').classList.add('show'); }
+
+    // =============================================
+    // 🧠 الگوریتم هوشمند پیدا کردن جای خالی در PDF
+    // =============================================
+    async function autoStampPdf(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const status = document.getElementById('pdfStatus');
+        status.innerText = "⏳ در حال اسکن پیکسل‌های PDF و پیدا کردن فضای خالی...";
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            
+            // 1. رندر صفحه اول PDF روی کانواس جهت آنالیز جای خالی
+            const pdfDocJS = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const pageJS = await pdfDocJS.getPage(1);
+            const viewport = pageJS.getViewport({ scale: 1.0 });
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            await pageJS.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            // 2. آنالیز جای خالی (کاندیداها: پایین سمت چپ، پایین سمت راست، بالا سمت چپ)
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imgData.data;
+
+            // تعریف ۳ ناحیه کاندیدا برای مهر (عرض ۱۵۰، ارتفاع ۵۰ پیکسل)
+            const stampW = 180;
+            const stampH = 45;
+            
+            const candidates = [
+                { name: 'bottom-left', x: 20, y: canvas.height - stampH - 20 },
+                { name: 'bottom-right', x: canvas.width - stampW - 20, y: canvas.height - stampH - 20 },
+                { name: 'top-left', x: 20, y: 20 },
+                { name: 'bottom-center', x: (canvas.width / 2) - (stampW / 2), y: canvas.height - stampH - 20 }
+            ];
+
+            // پیدا کردن سفیدترین ناحیه (کمترین پیکسل غیرسفید)
+            let bestSpot = candidates[0];
+            let minDarkPixels = Infinity;
+
+            candidates.forEach(spot => {
+                let darkCount = 0;
+                for (let y = Math.floor(spot.y); y < spot.y + stampH; y += 2) {
+                    for (let x = Math.floor(spot.x); x < spot.x + stampW; x += 2) {
+                        const index = (y * canvas.width + x) * 4;
+                        const r = pixels[index];
+                        const g = pixels[index + 1];
+                        const b = pixels[index + 2];
+                        // اگر پیکسل خیلی سفید نباشد
+                        if (r < 240 || g < 240 || b < 240) {
+                            darkCount++;
+                        }
+                    }
+                }
+                if (darkCount < minDarkPixels) {
+                    minDarkPixels = darkCount;
+                    bestSpot = spot;
+                }
+            });
+
+            status.innerText = "✨ جای خالی پیدا شد! در حال درج مهر کافی‌نت...";
+
+            // 3. ساخت تصویر مهر خوانی با Canvas شفاف
+            const stampCanvas = document.createElement('canvas');
+            stampCanvas.width = 360;
+            stampCanvas.height = 90;
+            const sCtx = stampCanvas.getContext('2d');
+
+            // کادر مهر
+            sCtx.strokeStyle = '#8e24aa';
+            sCtx.lineWidth = 3;
+            sCtx.roundRect(5, 5, 350, 80, 10);
+            sCtx.stroke();
+
+            // متن مهر
+            sCtx.fillStyle = '#4a148c';
+            sCtx.font = 'bold 18px Tahoma';
+            sCtx.direction = 'rtl';
+            sCtx.textAlign = 'center';
+            sCtx.fillText("انجام شده توسط کافی نت رز", 180, 38);
+            sCtx.font = 'bold 16px Tahoma';
+            sCtx.fillText("📞 ۰۳۱۴۵۸۱۰0۵۵", 180, 68);
+
+            const stampPngBase64 = stampCanvas.toDataURL('image/png');
+
+            // 4. باز کردن با pdf-lib و درج عکس مهر
+            const pdfDocLib = await PDFLib.PDFDocument.load(arrayBuffer);
+            const stampImage = await pdfDocLib.embedPng(stampPngBase64);
+
+            const pages = pdfDocLib.getPages();
+            const firstPage = pages[0];
+            const { width, height } = firstPage.getSize();
+
+            // تبدیل مختصات Canvas به مختصات PDF (چون PDF صفر-صفرش پایین سم چپ است)
+            const pdfX = (bestSpot.x / canvas.width) * width;
+            const pdfY = height - ((bestSpot.y / canvas.height) * height) - ((stampH / canvas.height) * height);
+            const pdfW = (stampW / canvas.width) * width;
+            const pdfH = (stampH / canvas.height) * height;
+
+            firstPage.drawImage(stampImage, {
+                x: pdfX,
+                y: pdfY,
+                width: pdfW,
+                height: pdfH,
+            });
+
+            // 5. دانلود فایل نهایی
+            const pdfBytes = await pdfDocLib.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `مهر_شده_${file.name}`;
+            link.click();
+
+            status.innerText = "🟢 مهر زدن با موفقیت انجام شد و فایل دانلود گردید!";
+        } catch (err) {
+            console.error(err);
+            status.innerText = "🔴 خطایی رخ داد! مطمئن شوید فایل PDF سالم است.";
+        }
     }
 
-    // پیش‌نمایش و رندر عکس‌های مدرک
-    function renderDocPreviews() {
-        const container = document.getElementById('previewContainer');
-        container.innerHTML = '';
-        tempDocImages.forEach((imgSrc, index) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'preview-thumb-wrapper';
-            wrapper.innerHTML = `
-                <img src="${imgSrc}" class="preview-thumb">
-                <button type="button" class="remove-img-btn" onclick="removeDocImage(${index})">×</button>
-            `;
-            container.appendChild(wrapper);
-        });
-    }
-
-    function removeDocImage(index) {
-        tempDocImages.splice(index, 1);
-        renderDocPreviews();
-    }
-
+    // باقی توابع قبلی بدون تغییر
     function previewDocs(event) {
-        const files = event.target.files;
-        Array.from(files).forEach(file => {
+        Array.from(event.target.files).forEach(file => {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.src = e.target.result;
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const maxWidth = 800;
-                    const scale = maxWidth / img.width;
-                    canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
-                    canvas.height = (img.width > maxWidth) ? img.height * scale : img.height;
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    const maxWidth = 800; const scale = maxWidth / img.width;
+                    canvas.width = (img.width > maxWidth) ? maxWidth : img.width; canvas.height = (img.width > maxWidth) ? img.height * scale : img.height;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    tempDocImages.push(compressedBase64);
-                    renderDocPreviews();
+                    tempDocImages.push(canvas.toDataURL('image/jpeg', 0.7)); renderDocPreviews();
                 };
             };
             reader.readAsDataURL(file);
         });
     }
 
-    // بارگذاری داده‌ها از گیت‌هاب
+    function renderDocPreviews() {
+        const container = document.getElementById('previewContainer'); container.innerHTML = '';
+        tempDocImages.forEach((imgSrc, index) => {
+            container.innerHTML += `<div class="preview-thumb-wrapper"><img src="${imgSrc}" class="preview-thumb"><button type="button" class="remove-img-btn" onclick="removeDocImage(${index})">×</button></div>`;
+        });
+    }
+    function removeDocImage(index) { tempDocImages.splice(index, 1); renderDocPreviews(); }
+
     async function loadFromGithub() {
         try {
-            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                headers: { "Authorization": `token ${TOKEN}` }
-            });
+            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, { headers: { "Authorization": `token ${TOKEN}` } });
             if (res.status === 200) {
-                const data = await res.json();
-                fileSHA = data.sha;
-                const content = decodeURIComponent(escape(atob(data.content)));
-                customers = JSON.parse(content) || [];
-                renderTable();
-            } else if (res.status === 404) {
-                customers = [];
+                const data = await res.json(); fileSHA = data.sha;
+                customers = JSON.parse(decodeURIComponent(escape(atob(data.content)))) || [];
+                customers.forEach(c => { if(!c.services) c.services = []; if(!c.birthDate) c.birthDate = '---'; });
                 renderTable();
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {}
     }
 
-    // ذخیره در گیت‌هاب
     async function syncToGithub() {
-        const tag = document.getElementById('statusTag');
-        tag.className = 'status-tag syncing';
-        tag.innerText = '⏳ در حال ذخیره‌سازی ابری و بروزرسانی در گیت‌هاب...';
-
-        const jsonStr = JSON.stringify(customers);
-        const encodedContent = btoa(unescape(encodeURIComponent(jsonStr)));
-
-        const payload = {
-            message: `Update customers (${new Date().toLocaleString('fa-IR')})`,
-            content: encodedContent
-        };
+        const tag = document.getElementById('statusTag'); tag.className = 'status-tag syncing'; tag.innerText = '⏳ در حال ذخیره‌سازی...';
+        const payload = { message: `Update data`, content: btoa(unescape(encodeURIComponent(JSON.stringify(customers)))) };
         if (fileSHA) payload.sha = fileSHA;
-
         try {
-            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                method: "PUT",
-                headers: { "Authorization": `token ${TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                fileSHA = data.content.sha;
-                tag.className = 'status-tag';
-                tag.innerText = '🟢 بروزرسانی شد و در گیت‌هاب ذخیره گردید (' + customers.length + ' مشتری ثبت‌شده)';
-            }
+            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, { method: "PUT", headers: { "Authorization": `token ${TOKEN}`, "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            if (res.ok) { fileSHA = (await res.json()).content.sha; tag.className = 'status-tag'; tag.innerText = '🟢 ذخیره شد'; }
         } catch (err) { alert('خطای شبکه!'); }
     }
 
-    // ذخیره یا ویرایش مشتری
     async function saveCustomer(e) {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-
+        e.preventDefault(); document.getElementById('submitBtn').disabled = true;
         if (editingCustomerId) {
-            // حالت ویرایش
-            btn.innerText = '⏳ در حال بروزرسانی تغییرات...';
             const c = customers.find(x => x.id === editingCustomerId);
             if (c) {
-                c.name = document.getElementById('fullName').value.trim();
-                c.nationalCode = document.getElementById('nationalCode').value.trim();
-                c.phone = document.getElementById('phone').value.trim();
-                c.postalCode = document.getElementById('postalCode').value.trim() || '---';
-                c.income = document.getElementById('income').value.trim() || '---';
-                c.hasHouse = document.getElementById('hasHouse').value;
-                c.hasCar = document.getElementById('hasCar').value;
-                c.notes = document.getElementById('notes').value.trim() || '---';
-                c.docs = [...tempDocImages];
+                c.name = document.getElementById('fullName').value.trim(); c.nationalCode = document.getElementById('nationalCode').value.trim();
+                c.birthDate = document.getElementById('birthDate').value.trim() || '---'; c.phone = document.getElementById('phone').value.trim();
+                c.postalCode = document.getElementById('postalCode').value.trim() || '---'; c.income = document.getElementById('income').value.trim() || '---';
+                c.hasHouse = document.getElementById('hasHouse').value; c.hasCar = document.getElementById('hasCar').value;
+                c.notes = document.getElementById('notes').value.trim() || '---'; c.docs = [...tempDocImages];
             }
         } else {
-            // حالت مشتری جدید
-            btn.innerText = '⏳ در حال فشرده‌سازی و ثبت...';
-            const newCustomer = {
-                id: Date.now(),
-                name: document.getElementById('fullName').value.trim(),
-                nationalCode: document.getElementById('nationalCode').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                postalCode: document.getElementById('postalCode').value.trim() || '---',
-                income: document.getElementById('income').value.trim() || '---',
-                hasHouse: document.getElementById('hasHouse').value,
-                hasCar: document.getElementById('hasCar').value,
-                notes: document.getElementById('notes').value.trim() || '---',
-                docs: [...tempDocImages]
-            };
-            customers.unshift(newCustomer);
+            customers.unshift({
+                id: Date.now(), name: document.getElementById('fullName').value.trim(), nationalCode: document.getElementById('nationalCode').value.trim(),
+                birthDate: document.getElementById('birthDate').value.trim() || '---', phone: document.getElementById('phone').value.trim(),
+                postalCode: document.getElementById('postalCode').value.trim() || '---', income: document.getElementById('income').value.trim() || '---',
+                hasHouse: document.getElementById('hasHouse').value, hasCar: document.getElementById('hasCar').value,
+                notes: document.getElementById('notes').value.trim() || '---', docs: [...tempDocImages], services: []
+            });
         }
-
-        renderTable();
-        cancelEdit(); // ریست کردن فرم
-        await syncToGithub();
-        btn.disabled = false;
-    }
-
-    // شروع فرآیند ویرایش
-    function editCustomer(id) {
-        const c = customers.find(x => x.id === id);
-        if (!c) return;
-
-        editingCustomerId = id;
-        document.getElementById('fullName').value = c.name;
-        document.getElementById('nationalCode').value = c.nationalCode;
-        document.getElementById('phone').value = c.phone;
-        document.getElementById('postalCode').value = (c.postalCode === '---') ? '' : c.postalCode;
-        document.getElementById('income').value = (c.income === '---') ? '' : c.income;
-        document.getElementById('hasHouse').value = c.hasHouse;
-        document.getElementById('hasCar').value = c.hasCar;
-        document.getElementById('notes').value = (c.notes === '---') ? '' : c.notes;
-
-        tempDocImages = (c.docs && c.docs.length) ? [...c.docs] : [];
-        renderDocPreviews();
-
-        // تغییر ظاهر فرم به حالت ویرایش
-        document.getElementById('formTitle').innerText = '✏️ ویرایش مشخصات مشتری: ' + c.name;
-        const btn = document.getElementById('submitBtn');
-        btn.innerText = '✏️ ثبت تغییرات و بروزرسانی در گیت‌هاب';
-        btn.style.background = '#f57c00';
-        document.getElementById('cancelEditBtn').style.display = 'block';
-
-        // اسکرول نرم به بالای فرم
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // انصراف از ویرایش
-    function cancelEdit() {
-        editingCustomerId = null;
-        document.getElementById('customerForm').reset();
-        document.getElementById('previewContainer').innerHTML = '';
-        tempDocImages = [];
-
-        document.getElementById('formTitle').innerText = '➕ ثبت مشخصات و مدارک مشتری جدید';
-        const btn = document.getElementById('submitBtn');
-        btn.innerText = '💾 ثبت و ذخیره‌سازی مشتری در گیت‌هاب';
-        btn.style.background = '#e91e63';
-        document.getElementById('cancelEditBtn').style.display = 'none';
+        renderTable(); cancelEdit(); await syncToGithub(); document.getElementById('submitBtn').disabled = false;
     }
 
     function renderTable(data = customers) {
         const tbody = document.getElementById('customerTableBody');
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" style="padding:20px; color:#888;">هیچ اطلاعاتی ثبت نشده است.</td></tr>';
-            return;
-        }
-
-        data.forEach((c, i) => {
-            const tr = document.createElement('tr');
-            const docCount = (c.docs && c.docs.length) ? c.docs.length : 0;
-
-            tr.innerHTML = `
-                <td>${i + 1}</td>
-                <td><b>${c.name}</b> <button class="copy-btn" onclick="copyText('${c.name}', this)">کپی</button></td>
-                <td><code>${c.nationalCode}</code> <button class="copy-btn" onclick="copyText('${c.nationalCode}', this)">کپی</button></td>
-                <td><code>${c.phone}</code> <button class="copy-btn" onclick="copyText('${c.phone}', this)">کپی</button></td>
-                <td><code>${c.postalCode}</code> ${c.postalCode !== '---' ? `<button class="copy-btn" onclick="copyText('${c.postalCode}', this)">کپی</button>` : ''}</td>
-                <td>${c.income}</td>
-                <td><span class="badge ${c.hasHouse === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasHouse}</span></td>
-                <td><span class="badge ${c.hasCar === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasCar}</span></td>
-                <td style="color:#666;">${c.notes}</td>
-                <td>
-                    ${docCount > 0 
-                        ? `<button class="doc-btn" onclick="viewDocs(${c.id})">🖼️ ${docCount} مدرک</button>` 
-                        : '<span style="color:#aaa;">بدون مدرک</span>'}
+        tbody.innerHTML = data.map((c) => {
+            let totalDebt = 0;
+            if(c.services) c.services.forEach(s => { if(s.isPaid === "false" || s.isPaid === false) totalDebt += Number(s.price); });
+            const debtHTML = totalDebt > 0 ? `<span class="debt-red">بدهکار: ${formatMoney(totalDebt)} تومان</span>` : `<span class="debt-green">بدون بدهی</span>`;
+            
+            return `<tr>
+                <td><b>${c.name}</b> <button class="copy-btn" onclick="copy('${c.name}')">کپی</button></td>
+                <td>${c.nationalCode} <button class="copy-btn" onclick="copy('${c.nationalCode}')">کپی</button></td>
+                <td>${c.birthDate}</td>
+                <td>${c.phone} <button class="copy-btn" onclick="copy('${c.phone}')">کپی</button></td>
+                <td style="font-size:10px;">${c.postalCode}<br>توضیح:${c.notes}</td>
+                <td style="font-size:11px;">درآمد: ${c.income}<br>🏠 ${c.hasHouse} | 🚗 ${c.hasCar}</td>
+                <td>${debtHTML}</td>
+                <td style="text-align:right;">
+                    <button class="action-btn btn-blue" onclick="openFinance(${c.id})">💼 کار / مالی</button>
+                    ${c.docs && c.docs.length > 0 ? `<button class="action-btn btn-purple" onclick="viewDocs(${c.id})">🖼️ مدارک</button>` : ''}
+                    <button class="action-btn btn-green" onclick="printSingleCustomer(${c.id})">🖨️ فیش</button>
+                    <button class="action-btn btn-orange" onclick="editCustomer(${c.id})">✏️</button>
+                    <button class="action-btn btn-red" onclick="deleteCustomer(${c.id})">❌</button>
                 </td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="8">رکوردی یافت نشد</td></tr>';
+    }
+
+    function openFinance(id) {
+        activeFinanceCustomerId = id; const c = customers.find(x => x.id === id);
+        document.getElementById('financeTitle').innerText = `سابقه کارهای انجام شده برای: ${c.name}`;
+        renderFinanceTable(); document.getElementById('financeModal').classList.add('show');
+    }
+
+    function renderFinanceTable() {
+        const c = customers.find(x => x.id === activeFinanceCustomerId);
+        let totalDebt = 0; const tbody = document.getElementById('financeTableBody');
+        
+        tbody.innerHTML = c.services.map(s => {
+            const isDebt = (s.isPaid === "false" || s.isPaid === false);
+            if(isDebt) totalDebt += Number(s.price);
+            return `<tr style="background: ${isDebt ? '#fff8f8' : '#f6fff6'};">
+                <td>${s.date}</td>
+                <td><b>${s.desc}</b></td>
+                <td style="font-weight:bold;">${formatMoney(s.price)}</td>
                 <td>
-                    <button class="edit-btn-row" onclick="editCustomer(${c.id})">✏️ ویرایش</button>
-                    <button class="print-btn-row" onclick="printSingleCustomer(${c.id})">🖨️ فیش</button>
-                    <button class="del-btn" onclick="deleteCustomer(${c.id})">حذف</button>
+                    <button class="toggle-pay-btn" style="background:${isDebt ? '#d32f2f' : '#388e3c'};" 
+                    onclick="togglePayment(${s.id}, ${isDebt}, '${s.desc}', ${s.price})">
+                    ${isDebt ? '❌ ثبت به عنوان پرداخت شده' : '✅ پرداخت شده (تغییر)'}
+                    </button>
                 </td>
-            `;
-            tbody.appendChild(tr);
-        });
+                <td><button class="action-btn btn-red" onclick="delService(${s.id})">حذف</button></td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="5" style="padding:15px;color:#777;">هیچ کاری ثبت نشده است.</td></tr>';
+        
+        document.getElementById('totalDebtDisplay').innerText = `جمع کل بدهی: ${formatMoney(totalDebt)} تومان`;
+        renderTable(); 
     }
 
-    // ===== توابع چاپ =====
-    const roseSVG = `<svg viewBox="0 0 100 120"><path d="M50 95 C50 95 48 60 50 40 C52 20 70 10 50 5 C30 10 48 20 50 40 Z" fill="none" stroke="#000" stroke-width="3"/><path d="M50 40 C65 30 75 45 50 65 C25 45 35 30 50 40 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 65 Q30 80 20 60 Q35 50 50 65 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 75 Q70 85 80 65 Q65 55 50 75 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 65 L50 115" stroke="#000" stroke-width="3"/><path d="M50 85 Q30 80 25 90 Q40 95 50 85 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 95 Q70 90 75 100 Q60 105 50 95 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`;
+    async function addService() {
+        const desc = document.getElementById('srvDesc').value.trim();
+        const price = document.getElementById('srvPrice').value;
+        const status = document.getElementById('srvStatus').value;
+        if(!desc || !price) return alert("لطفاً شرح کار و مبلغ را وارد کنید.");
 
-    function generateSlipHTML(data = null) {
-        const name = data ? data.name : '';
-        const code = data ? data.nationalCode : '';
-        const phone = data ? data.phone : '';
-        const postal = data ? data.postalCode : '';
-        const income = data ? data.income : '';
-        const houseYes = (data && data.hasHouse === 'دارد') ? '✓' : '';
-        const houseNo = (data && data.hasHouse === 'ندارد') ? '✓' : '';
-        const carYes = (data && data.hasCar === 'دارد') ? '✓' : '';
-        const carNo = (data && data.hasCar === 'ندارد') ? '✓' : '';
-
-        return `
-            <div class="slip-card">
-                <div class="slip-header">
-                    ${roseSVG}
-                    <h2>کافی نت رز</h2>
-                </div>
-                <div class="slip-body">
-                    <div class="slip-row">
-                        <div class="slip-field">نام و نام خانوادگی: <span class="line">${name}</span></div>
-                        <div class="slip-field">کد ملی: <span class="line">${code}</span></div>
-                        <div class="slip-field">شماره همراه: <span class="line">${phone}</span></div>
-                    </div>
-                    <div class="slip-row">
-                        <div class="slip-field">کد پستی: <span class="line">${postal}</span> <span style="font-size:10px;margin-right:3px;">(۱۰ رقم)</span></div>
-                        <div class="slip-field">درآمد: <span class="line" style="min-width:70px;">${income}</span></div>
-                        <div class="slip-field">
-                            مسکن: 
-                            <span class="checkbox">${houseYes}</span> دارد 
-                            <span class="checkbox">${houseNo}</span> ندارد
-                        </div>
-                        <div class="slip-field">
-                            خودرو: 
-                            <span class="checkbox">${carYes}</span> دارد 
-                            <span class="checkbox">${carNo}</span> ندارد
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const c = customers.find(x => x.id === activeFinanceCustomerId);
+        c.services.push({ id: Date.now(), date: getPersianDate(), desc: desc, price: price, isPaid: status });
+        
+        document.getElementById('srvDesc').value = ''; document.getElementById('srvPrice').value = '';
+        renderFinanceTable(); await syncToGithub();
     }
 
-    function printBlankForms() {
-        const area = document.getElementById('printableArea');
-        let html = '<div class="a4-page">';
-        for (let i = 0; i < 4; i++) {
-            html += generateSlipHTML(null);
-            if (i < 3) html += '<div class="cut-line"><span>✂️</span></div>';
+    async function togglePayment(srvId, currentlyDebt, desc, price) {
+        const c = customers.find(x => x.id === activeFinanceCustomerId);
+        const s = c.services.find(x => x.id === srvId);
+        
+        if (currentlyDebt) {
+            if (confirm(`آیا مبلغ ${formatMoney(price)} تومان بابت "${desc}" پرداخت شد؟`)) {
+                s.isPaid = true;
+            } else { return; }
+        } else {
+            if (confirm(`تغییر به وضعیت بدهکار؟`)) {
+                s.isPaid = false;
+            } else { return; }
         }
-        html += '</div>';
-        area.innerHTML = html;
-        window.print();
+        renderFinanceTable(); await syncToGithub();
     }
 
-    function printSingleCustomer(id) {
-        const c = customers.find(x => x.id === id);
-        if (!c) return;
-
-        const area = document.getElementById('printableArea');
-        let html = '<div class="a4-page">';
-        html += generateSlipHTML(c);
-        html += '<div class="cut-line"><span>✂️</span></div>';
-        for (let i = 0; i < 3; i++) {
-            html += generateSlipHTML(null);
-            if (i < 2) html += '<div class="cut-line"><span>✂️</span></div>';
+    async function delService(srvId) {
+        if(confirm("حذف این سابقه؟")) {
+            const c = customers.find(x => x.id === activeFinanceCustomerId);
+            c.services = c.services.filter(x => x.id !== srvId);
+            renderFinanceTable(); await syncToGithub();
         }
-        html += '</div>';
-        area.innerHTML = html;
-        window.print();
     }
 
+    function editCustomer(id) {
+        editingCustomerId = id; const c = customers.find(x => x.id === id);
+        document.getElementById('fullName').value = c.name; document.getElementById('nationalCode').value = c.nationalCode;
+        document.getElementById('birthDate').value = c.birthDate === '---' ? '' : c.birthDate;
+        document.getElementById('phone').value = c.phone; document.getElementById('postalCode').value = c.postalCode === '---' ? '' : c.postalCode;
+        document.getElementById('income').value = c.income === '---' ? '' : c.income;
+        document.getElementById('hasHouse').value = c.hasHouse; document.getElementById('hasCar').value = c.hasCar;
+        document.getElementById('notes').value = c.notes === '---' ? '' : c.notes;
+        tempDocImages = c.docs ? [...c.docs] : []; renderDocPreviews();
+        document.getElementById('formTitle').innerText = '✏️ ویرایش: ' + c.name;
+        document.getElementById('submitBtn').innerText = '✏️ ثبت تغییرات'; document.getElementById('cancelEditBtn').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        editingCustomerId = null; document.getElementById('customerForm').reset();
+        document.getElementById('previewContainer').innerHTML = ''; tempDocImages = [];
+        document.getElementById('formTitle').innerText = '➕ ثبت مشتری جدید';
+        document.getElementById('submitBtn').innerText = '💾 ثبت در گیت‌هاب'; document.getElementById('cancelEditBtn').style.display = 'none';
+    }
+
+    async function deleteCustomer(id) { if (confirm('حذف کلی؟')) { customers = customers.filter(c => c.id !== id); renderTable(); await syncToGithub(); } }
+    function copy(t) { navigator.clipboard.writeText(t); }
+    function filterCustomers() { const q = document.getElementById('searchBox').value.toLowerCase(); renderTable(customers.filter(c => c.name.toLowerCase().includes(q) || c.nationalCode.includes(q) || c.phone.includes(q))); }
+    
     function viewDocs(id) {
         const c = customers.find(x => x.id === id);
-        if (!c || !c.docs || c.docs.length === 0) return;
-
-        document.getElementById('modalTitle').innerText = 'مدارک ' + c.name;
-        const gallery = document.getElementById('modalGallery');
-        gallery.innerHTML = '';
-
-        c.docs.forEach((imgSrc, index) => {
-            const div = document.createElement('div');
-            div.className = 'gallery-item';
-            div.innerHTML = `
-                <a href="${imgSrc}" target="_blank">
-                    <img src="${imgSrc}" title="نمایش تصویر بزرگ">
-                </a>
-                <br>
-                <a href="${imgSrc}" download="مدرک_${c.name}_${index+1}.jpg" style="font-size:11px; color:#e91e63;">دانلود عکس</a>
-            `;
-            gallery.appendChild(div);
-        });
-
+        document.getElementById('modalGallery').innerHTML = c.docs.map(img => `<div style="text-align:center;"><a href="${img}" target="_blank"><img src="${img}" style="width:100%;height:180px;object-fit:cover;border-radius:8px;"></a></div>`).join('');
         document.getElementById('docModal').classList.add('show');
     }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-    function closeModal() { document.getElementById('docModal').classList.remove('show'); }
-
-    function copyText(text, btn) {
-        navigator.clipboard.writeText(text).then(() => {
-            const orig = btn.innerText;
-            btn.innerText = '✓';
-            btn.classList.add('copied');
-            setTimeout(() => { btn.innerText = orig; btn.classList.remove('copied'); }, 1000);
-        });
+    // ===== چاپ =====
+    const roseSVG = `<svg viewBox="0 0 100 120"><path d="M50 95 C50 95 48 60 50 40 C52 20 70 10 50 5 C30 10 48 20 50 40 Z" fill="none" stroke="#000" stroke-width="3"/><path d="M50 40 C65 30 75 45 50 65 C25 45 35 30 50 40 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 65 Q30 80 20 60 Q35 50 50 65 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 75 Q70 85 80 65 Q65 55 50 75 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 65 L50 115" stroke="#000" stroke-width="3"/><path d="M50 85 Q30 80 25 90 Q40 95 50 85 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 95 Q70 90 75 100 Q60 105 50 95 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`;
+    function generateSlipHTML(c = null) {
+        return `<div class="slip-card">
+            <div class="slip-header">${roseSVG}<h2>کافی نت رز</h2></div>
+            <div class="slip-body">
+                <div class="slip-row">
+                    <div class="slip-field">نام: <span class="line">${c?c.name:''}</span></div>
+                    <div class="slip-field">کد ملی: <span class="line">${c?c.nationalCode:''}</span></div>
+                    <div class="slip-field">تولد: <span class="line" style="min-width:60px;">${c?c.birthDate:''}</span></div>
+                </div>
+                <div class="slip-row">
+                    <div class="slip-field">موبایل: <span class="line">${c?c.phone:''}</span></div>
+                    <div class="slip-field">کد پستی: <span class="line">${c?c.postalCode:''}</span></div>
+                    <div class="slip-field">درآمد: <span class="line" style="min-width:60px;">${c?c.income:''}</span></div>
+                </div>
+                <div class="slip-row">
+                    <div class="slip-field">مسکن: <span class="checkbox">${c&&c.hasHouse==='دارد'?'✓':''}</span> دارد <span class="checkbox">${c&&c.hasHouse==='ندارد'?'✓':''}</span> ندارد</div>
+                    <div class="slip-field">خودرو: <span class="checkbox">${c&&c.hasCar==='دارد'?'✓':''}</span> دارد <span class="checkbox">${c&&c.hasCar==='ندارد'?'✓':''}</span> ندارد</div>
+                </div>
+            </div>
+        </div>`;
     }
-
-    async function deleteCustomer(id) {
-        if (confirm('آیا از حذف این مشتری و تمام مدارک آن اطمینان دارید؟')) {
-            if (editingCustomerId === id) cancelEdit();
-            customers = customers.filter(c => c.id !== id);
-            renderTable();
-            await syncToGithub();
-        }
+    function printBlankForms() {
+        let h = '<div class="a4-page">'; for(let i=0;i<4;i++){ h+=generateSlipHTML(); if(i<3) h+='<div class="cut-line"><span>✂️</span></div>'; }
+        document.getElementById('printableArea').innerHTML = h + '</div>'; window.print();
     }
-
-    function filterCustomers() {
-        const q = document.getElementById('searchBox').value.toLowerCase();
-        renderTable(customers.filter(c => 
-            c.name.toLowerCase().includes(q) || 
-            c.nationalCode.includes(q) || 
-            c.phone.includes(q)
-        ));
+    function printSingleCustomer(id) {
+        const c = customers.find(x => x.id === id);
+        let h = '<div class="a4-page">' + generateSlipHTML(c) + '<div class="cut-line"><span>✂️</span></div>';
+        for(let i=0;i<3;i++){ h+=generateSlipHTML(); if(i<2) h+='<div class="cut-line"><span>✂️</span></div>'; }
+        document.getElementById('printableArea').innerHTML = h + '</div>'; window.print();
     }
 
     function exportToCSV() {
-        if (customers.length === 0) { alert('اطلاعاتی وجود ندارد.'); return; }
-        let csv = "\uFEFFنام,کد ملی,تلفن,کد پستی,درآمد,ملک,خودرو,توضیحات,تعداد مدارک\n";
+        let csv = "\uFEFFنام,کد ملی,تولد,تلفن,کد پستی,درآمد,ملک,خودرو,توضیحات,جمع بدهی\n";
         customers.forEach(c => {
-            const docCount = (c.docs && c.docs.length) ? c.docs.length : 0;
-            csv += `"${c.name}","${c.nationalCode}","${c.phone}","${c.postalCode}","${c.income}","${c.hasHouse}","${c.hasCar}","${c.notes}","${docCount} عدد"\n`;
+            let debt = 0; if(c.services) c.services.forEach(s => { if(s.isPaid === "false" || s.isPaid === false) debt += Number(s.price); });
+            csv += `"${c.name}","${c.nationalCode}","${c.birthDate}","${c.phone}","${c.postalCode}","${c.income}","${c.hasHouse}","${c.hasCar}","${c.notes}","${debt}"\n`;
         });
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'مشتریان_کافی_نت_رز.csv';
-        a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = 'مشتریان_کافی_نت_رز.csv'; a.click();
     }
 </script>
 </body>
