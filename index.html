@@ -8,43 +8,58 @@
         * { box-sizing: border-box; font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         body { background: #f0f2f5; direction: rtl; min-height: 100vh; }
 
-        /* صفحه ورود */
-        .login-overlay {
+        /* ===== پنجره ورود و ثبت‌نام ===== */
+        .auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
             display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
-        .login-overlay.hidden { display: none; }
-        .login-box {
-            background: white; padding: 35px; border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; text-align: center;
+        .auth-overlay.hidden { display: none; }
+        .auth-box {
+            background: white; padding: 35px 30px; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35); width: 420px; text-align: center;
         }
-        .login-box .logo { font-size: 45px; margin-bottom: 5px; }
-        .login-box h2 { color: #880e4f; margin-bottom: 5px; font-size: 20px; }
-        .login-box p { color: #777; font-size: 12px; margin-bottom: 20px; line-height: 1.6; }
-        .login-box input {
-            width: 100%; padding: 12px; border: 2px solid #e0e0e0;
-            border-radius: 8px; font-size: 13px; margin-bottom: 12px;
-            outline: none; text-align: center; direction: ltr;
+        .auth-box .logo { font-size: 45px; margin-bottom: 5px; }
+        .auth-box h2 { color: #880e4f; margin-bottom: 15px; font-size: 20px; }
+
+        /* دکمه‌های جابجایی تب ورود / ثبت نام */
+        .tab-buttons { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab-btn {
+            flex: 1; padding: 10px; background: none; border: none; font-size: 14px;
+            font-weight: bold; cursor: pointer; color: #888; transition: 0.3s;
+            border-bottom: 3px solid transparent;
         }
-        .login-box input:focus { border-color: #e91e63; }
-        .btn-login {
+        .tab-btn.active { color: #e91e63; border-color: #e91e63; }
+
+        .auth-form { display: none; text-align: right; }
+        .auth-form.active { display: block; }
+        
+        .form-input-group { margin-bottom: 12px; }
+        .form-input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #444; }
+        .form-input-group input {
+            width: 100%; padding: 11px; border: 1.5px solid #ccc; border-radius: 8px;
+            font-size: 13px; outline: none; transition: 0.2s;
+        }
+        .form-input-group input:focus { border-color: #e91e63; box-shadow: 0 0 5px rgba(233,30,99,0.2); }
+        .form-input-group small { font-size: 10px; color: #888; display: block; margin-top: 2px; }
+
+        .btn-auth {
             width: 100%; padding: 12px; background: linear-gradient(135deg, #e91e63, #880e4f);
             color: white; border: none; border-radius: 8px; font-size: 15px;
-            font-weight: bold; cursor: pointer; transition: 0.2s;
+            font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s;
         }
-        .btn-login:hover { opacity: 0.9; }
-        .login-error { color: #f44336; font-size: 12px; margin-top: 10px; display: none; font-weight: bold; }
+        .btn-auth:hover { opacity: 0.9; transform: scale(1.01); }
+        .auth-error { color: #f44336; font-size: 12px; margin-top: 10px; display: none; font-weight: bold; text-align: center; }
 
-        /* صفحه اصلی */
+        /* ===== صفحه اصلی پنل کافی‌نت ===== */
         .main-app { display: none; padding: 20px; }
         .main-app.show { display: block; }
         .container { max-width: 1200px; margin: auto; }
         .header {
             background: linear-gradient(135deg, #e91e63, #880e4f); color: white;
             padding: 15px 20px; border-radius: 12px; display: flex;
-            justify-content: space-between; align-items: center;
-            margin-bottom: 15px; flex-wrap: wrap; gap: 10px;
+            justify-content: space-between; align-items: center; margin-bottom: 15px;
+            flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .header h2 { font-size: 18px; margin: 0; }
         .header-btns { display: flex; gap: 8px; }
@@ -78,34 +93,64 @@
 </head>
 <body>
 
-<!-- صفحه ورود و اتصال به گیت هاب -->
-<div class="login-overlay" id="loginOverlay">
-    <div class="login-box">
+<!-- ===== پنجره ورود و ثبت نام ===== -->
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-box">
         <div class="logo">🌹</div>
-        <h2>ورود به کافی نت رز</h2>
-        <p>توکن دسترسی گیت‌هاب (Personal Token) را وارد کنید تا اطلاعات مستقیماً در مخزن گیت‌هاب ذخیره شوند و هرگز پاک نشوند:</p>
-        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-        <button class="btn-login" onclick="loginWithGithub()">🔓 ورود و اتصال به سرور گیت‌هاب</button>
-        <div class="login-error" id="loginError">❌ توکن نامعتبر است یا دسترسی ندارد!</div>
+        <h2>سامانه کافی نت رز</h2>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" id="tabLoginBtn" onclick="switchTab('login')">🔑 ورود به سیستم</button>
+            <button class="tab-btn" id="tabRegBtn" onclick="switchTab('register')">📝 ثبت‌نام / تنظیمات</button>
+        </div>
+
+        <!-- فرم ورود -->
+        <div class="auth-form active" id="loginForm">
+            <div class="form-input-group">
+                <label>رمز عبور شما:</label>
+                <input type="password" id="loginPassword" placeholder="رمز عبوری که ساختید را وارد کنید" onkeydown="if(event.key==='Enter')doLogin()">
+            </div>
+            <button class="btn-auth" onclick="doLogin()">🔓 ورود به سامانه</button>
+            <div class="auth-error" id="loginError">❌ رمز عبور اشتباه است یا حسابی ساخته نشده!</div>
+        </div>
+
+        <!-- فرم ثبت نام -->
+        <div class="auth-form" id="registerForm">
+            <div class="form-input-group">
+                <label>نام کافی‌نت:</label>
+                <input type="text" id="regCafeName" placeholder="مثلاً: کافی نت رز">
+            </div>
+            <div class="form-input-group">
+                <label>رمز عبور دلخواه (برای دفعات بعد):</label>
+                <input type="password" id="regPassword" placeholder="یک رمز تعیین کنید">
+            </div>
+            <div class="form-input-group">
+                <label>توکن دسترسی گیت‌هاب (Personal Access Token):</label>
+                <input type="password" id="regGhToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="direction:ltr;">
+                <small>جهت ذخیره دائمی و ابری اطلاعات در اکانت گیت‌هاب</small>
+            </div>
+            <button class="btn-auth" onclick="doRegister()">💾 ذخیره و ایجاد حساب</button>
+            <div class="auth-error" id="regError">❌ لطفاً تمام فیلدها را با دقت پر کنید!</div>
+        </div>
     </div>
 </div>
 
-<!-- صفحه اصلی -->
+<!-- ===== صفحه اصلی پنل ===== -->
 <div class="main-app" id="mainApp">
     <div class="container">
         <div class="header">
-            <h2>🌹 کافی نت رز - سیستم ذخیره‌سازی ابری گیت‌هاب</h2>
+            <h2>🌹 <span id="cafeTitle">کافی نت رز</span> - سیستم مدیریت مشتریان</h2>
             <div class="header-btns">
                 <button class="btn-excel" onclick="exportToCSV()">📥 خروجی اکسل</button>
                 <button class="btn-logout" onclick="logout()">🚪 خروج</button>
             </div>
         </div>
 
-        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - تمام اطلاعات به صورت ابری و دائمی ذخیره می‌شوند</div>
+        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - ذخیره ابری اطلاعات فعال است</div>
 
-        <!-- فرم ثبت -->
+        <!-- فرم ثبت مشتری -->
         <div class="card">
-            <h4 style="margin-bottom:12px; color:#333;">➕ ثبت مشتری جدید</h4>
+            <h4 style="margin-bottom:12px; color:#333;">➕ ثبت مشخصات مشتری جدید</h4>
             <form id="customerForm" onsubmit="saveCustomer(event)">
                 <div class="form-grid">
                     <div class="form-group">
@@ -117,7 +162,7 @@
                         <input type="text" id="nationalCode" maxlength="10" required placeholder="0012345678">
                     </div>
                     <div class="form-group">
-                        <label>شماره همراه:</label>
+                        <label>شماره تماس همراه:</label>
                         <input type="text" id="phone" maxlength="11" required placeholder="09123456789">
                     </div>
                     <div class="form-group">
@@ -126,7 +171,7 @@
                     </div>
                     <div class="form-group">
                         <label>درآمد ماهانه:</label>
-                        <input type="text" id="income" placeholder="مثلاً: 15 میلیون">
+                        <input type="text" id="income" placeholder="مثلاً: ۱۵ میلیون">
                     </div>
                     <div class="form-group">
                         <label>وضعیت مسکن:</label>
@@ -144,10 +189,10 @@
                     </div>
                     <div class="form-group">
                         <label>توضیحات / رمز سامانه:</label>
-                        <input type="text" id="notes" placeholder="رمز سخا و...">
+                        <input type="text" id="notes" placeholder="رمز سخا یا توضیحات...">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit" id="submitBtn">💾 ذخیره در گیت‌هاب</button>
+                <button type="submit" class="btn-submit" id="submitBtn">💾 ذخیره مشخصات</button>
             </form>
         </div>
 
@@ -161,7 +206,7 @@
                             <th>ردیف</th>
                             <th>نام و نام خانوادگی</th>
                             <th>کد ملی</th>
-                            <th>شماره تماس</th>
+                            <th>شماره همراه</th>
                             <th>کد پستی</th>
                             <th>درآمد</th>
                             <th>ملک</th>
@@ -171,7 +216,7 @@
                         </tr>
                     </thead>
                     <tbody id="customerTableBody">
-                        <tr><td colspan="10" style="padding:20px; color:#888;">در حال بارگذاری اطلاعات از گیت‌هاب...</td></tr>
+                        <tr><td colspan="10" style="padding:20px; color:#888;">در حال دریافت اطلاعات...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -180,50 +225,94 @@
 </div>
 
 <script>
-    // اطلاعات مخزن شما در گیت‌هاب
     const REPO_OWNER = "navidsad1391-boop";
     const REPO_NAME = "cofenet";
     const FILE_PATH = "customers.json";
 
     let customers = [];
     let fileSHA = "";
-    let GITHUB_TOKEN = localStorage.getItem('rose_gh_token') || "";
 
-    if (GITHUB_TOKEN) {
-        showApp();
+    // جابجایی بین تب ورود و ثبت‌نام
+    function switchTab(tab) {
+        document.getElementById('tabLoginBtn').classList.toggle('active', tab === 'login');
+        document.getElementById('tabRegBtn').classList.toggle('active', tab === 'register');
+        document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+        document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('regError').style.display = 'none';
     }
 
-    async function loginWithGithub() {
-        const token = document.getElementById('ghToken').value.trim();
-        if (!token) return;
+    // بررسی اولیه
+    if (!localStorage.getItem('rose_auth_pass')) {
+        switchTab('register'); // اگر بار اول است، فرم ثبت نام باز شود
+    }
 
-        GITHUB_TOKEN = token;
-        const success = await loadFromGithub();
-        if (success) {
+    // ثبت‌نام / ساخت حساب جدید
+    async function doRegister() {
+        const name = document.getElementById('regCafeName').value.trim() || 'کافی نت رز';
+        const pass = document.getElementById('regPassword').value.trim();
+        const token = document.getElementById('regGhToken').value.trim();
+        const err = document.getElementById('regError');
+
+        if (!pass || !token) {
+            err.innerText = '❌ لطفاً رمز عبور و توکن گیت‌هاب را وارد کنید!';
+            err.style.display = 'block';
+            return;
+        }
+
+        // تست اعتبار توکن
+        const valid = await loadFromGithub(token);
+        if (valid) {
+            localStorage.setItem('rose_cafe_name', name);
+            localStorage.setItem('rose_auth_pass', pass);
             localStorage.setItem('rose_gh_token', token);
-            showApp();
+            sessionStorage.setItem('rose_logged_in', 'true');
+            showDashboard();
         } else {
-            document.getElementById('loginError').style.display = 'block';
+            err.innerText = '❌ توکن گیت‌هاب نامعتبر است یا به مخزن دسترسی ندارد!';
+            err.style.display = 'block';
         }
     }
 
-    function showApp() {
-        document.getElementById('loginOverlay').classList.add('hidden');
+    // ورود به حساب
+    async function doLogin() {
+        const passInput = document.getElementById('loginPassword').value.trim();
+        const savedPass = localStorage.getItem('rose_auth_pass');
+        const savedToken = localStorage.getItem('rose_gh_token');
+        const err = document.getElementById('loginError');
+
+        if (savedPass && passInput === savedPass && savedToken) {
+            sessionStorage.setItem('rose_logged_in', 'true');
+            showDashboard();
+            loadFromGithub(savedToken);
+        } else {
+            err.style.display = 'block';
+        }
+    }
+
+    function showDashboard() {
+        document.getElementById('authOverlay').classList.add('hidden');
         document.getElementById('mainApp').classList.add('show');
-        loadFromGithub();
+        const cName = localStorage.getItem('rose_cafe_name') || 'کافی نت رز';
+        document.getElementById('cafeTitle').innerText = cName;
+    }
+
+    if (sessionStorage.getItem('rose_logged_in') === 'true') {
+        showDashboard();
+        loadFromGithub(localStorage.getItem('rose_gh_token'));
     }
 
     function logout() {
-        localStorage.removeItem('rose_gh_token');
+        sessionStorage.removeItem('rose_logged_in');
         location.reload();
     }
 
     // خواندن فایل از گیت‌هاب
-    async function loadFromGithub() {
+    async function loadFromGithub(token) {
         try {
             const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 headers: {
-                    "Authorization": `token ${GITHUB_TOKEN}`,
+                    "Authorization": `token ${token}`,
                     "Accept": "application/vnd.github.v3+json"
                 }
             });
@@ -236,7 +325,6 @@
                 renderTable();
                 return true;
             } else if (res.status === 404) {
-                // فایل هنوز وجود ندارد
                 customers = [];
                 fileSHA = "";
                 renderTable();
@@ -244,16 +332,16 @@
             }
             return false;
         } catch (e) {
-            console.error(e);
             return false;
         }
     }
 
-    // ذخیره فایل جدید در گیت‌هاب
+    // ذخیره در گیت‌هاب
     async function syncToGithub() {
+        const token = localStorage.getItem('rose_gh_token');
         const tag = document.getElementById('statusTag');
         tag.className = 'status-tag syncing';
-        tag.innerText = '⏳ در حال همگام‌سازی و ذخیره در گیت‌هاب...';
+        tag.innerText = '⏳ در حال ذخیره‌سازی ابری در گیت‌هاب...';
 
         const jsonStr = JSON.stringify(customers, null, 2);
         const encodedContent = btoa(unescape(encodeURIComponent(jsonStr)));
@@ -268,7 +356,7 @@
             const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 method: "PUT",
                 headers: {
-                    "Authorization": `token ${GITHUB_TOKEN}`,
+                    "Authorization": `token ${token}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(payload)
@@ -278,12 +366,10 @@
                 const data = await res.json();
                 fileSHA = data.content.sha;
                 tag.className = 'status-tag';
-                tag.innerText = '🟢 تمام اطلاعات با موفقیت در گیت‌هاب ذخیره شد (' + customers.length + ' نفر)';
-            } else {
-                alert('خطا در همگام‌سازی با گیت‌هاب!');
+                tag.innerText = '🟢 ذخیره شد در گیت‌هاب (' + customers.length + ' نفر بایگانی شده)';
             }
         } catch (err) {
-            alert('خطای شبکه!');
+            alert('خطای اتصال اینترنت!');
         }
     }
 
@@ -291,7 +377,7 @@
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerText = '⏳ در حال ذخیره...';
+        btn.innerText = '⏳ در حال ثبت...';
 
         const customer = {
             id: Date.now(),
@@ -311,7 +397,7 @@
 
         await syncToGithub();
         btn.disabled = false;
-        btn.innerText = '💾 ذخیره در گیت‌هاب';
+        btn.innerText = '💾 ذخیره مشخصات';
     }
 
     function renderTable(data = customers) {
@@ -319,7 +405,7 @@
         tbody.innerHTML = '';
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="padding:20px; color:#888;">هیچ مشتری ثبت نشده است.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="padding:20px; color:#888;">هیچ مشتری‌ای ثبت نشده است.</td></tr>';
             return;
         }
 
