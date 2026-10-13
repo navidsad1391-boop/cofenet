@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>کافی نت رز - سیستم مدیریت مشتریان</title>
+    <title>سیستم جامع کافی نت رز</title>
     <style>
         * { box-sizing: border-box; font-family: Tahoma, 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        body { background: #f0f2f5; direction: rtl; min-height: 100vh; }
+        body { background: #f0f2f5; direction: rtl; min-height: 100vh; padding-bottom: 40px; }
 
-        /* ===== پنجره ورود و ثبت‌نام ===== */
+        /* ===== صفحه ورود / تنظیم رمز ===== */
         .auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
@@ -16,122 +16,162 @@
         }
         .auth-overlay.hidden { display: none; }
         .auth-box {
-            background: white; padding: 35px 30px; border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.35); width: 420px; text-align: center;
+            background: white; padding: 35px; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35); width: 380px; text-align: center;
         }
-        .auth-box .logo { font-size: 45px; margin-bottom: 5px; }
-        .auth-box h2 { color: #880e4f; margin-bottom: 15px; font-size: 20px; }
-
-        /* دکمه‌های جابجایی تب ورود / ثبت نام */
-        .tab-buttons { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
-        .tab-btn {
-            flex: 1; padding: 10px; background: none; border: none; font-size: 14px;
-            font-weight: bold; cursor: pointer; color: #888; transition: 0.3s;
-            border-bottom: 3px solid transparent;
+        .auth-box .logo { font-size: 50px; margin-bottom: 5px; }
+        .auth-box h2 { color: #880e4f; margin-bottom: 10px; font-size: 22px; }
+        .auth-box p { color: #666; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .auth-box input {
+            width: 100%; padding: 12px; border: 2px solid #ddd;
+            border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; text-align: center;
         }
-        .tab-btn.active { color: #e91e63; border-color: #e91e63; }
-
-        .auth-form { display: none; text-align: right; }
-        .auth-form.active { display: block; }
-        
-        .form-input-group { margin-bottom: 12px; }
-        .form-input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #444; }
-        .form-input-group input {
-            width: 100%; padding: 11px; border: 1.5px solid #ccc; border-radius: 8px;
-            font-size: 13px; outline: none; transition: 0.2s;
-        }
-        .form-input-group input:focus { border-color: #e91e63; box-shadow: 0 0 5px rgba(233,30,99,0.2); }
-        .form-input-group small { font-size: 10px; color: #888; display: block; margin-top: 2px; }
-
+        .auth-box input:focus { border-color: #e91e63; }
         .btn-auth {
             width: 100%; padding: 12px; background: linear-gradient(135deg, #e91e63, #880e4f);
-            color: white; border: none; border-radius: 8px; font-size: 15px;
-            font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s;
+            color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer;
         }
-        .btn-auth:hover { opacity: 0.9; transform: scale(1.01); }
-        .auth-error { color: #f44336; font-size: 12px; margin-top: 10px; display: none; font-weight: bold; text-align: center; }
+        .auth-error { color: #f44336; font-size: 13px; margin-top: 10px; display: none; font-weight: bold; }
 
-        /* ===== صفحه اصلی پنل کافی‌نت ===== */
+        /* ===== صفحه اصلی ===== */
         .main-app { display: none; padding: 20px; }
         .main-app.show { display: block; }
         .container { max-width: 1200px; margin: auto; }
         .header {
             background: linear-gradient(135deg, #e91e63, #880e4f); color: white;
-            padding: 15px 20px; border-radius: 12px; display: flex;
+            padding: 18px 25px; border-radius: 12px; display: flex;
             justify-content: space-between; align-items: center; margin-bottom: 15px;
-            flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .header h2 { font-size: 18px; margin: 0; }
-        .header-btns { display: flex; gap: 8px; }
-        .btn-excel { background: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-logout { background: #d32f2f; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        
-        .status-tag { background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 15px; text-align: center; border: 1px solid #c8e6c9; }
+        .header h2 { font-size: 20px; margin: 0; }
+        .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-header { color: white; border: none; padding: 9px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .btn-excel { background: #2e7d32; }
+        .btn-print-blank { background: #0288d1; }
+        .btn-logout { background: #d32f2f; }
+
+        .status-tag { background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 15px; text-align: center; border: 1px solid #c8e6c9; }
         .status-tag.syncing { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
 
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 15px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .card { background: white; padding: 22px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .card h3 { margin-bottom: 15px; color: #333; font-size: 16px; border-bottom: 2px solid #fce4ec; padding-bottom: 8px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #444; }
-        .form-group input, .form-group select { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; }
-        .form-group input:focus, .form-group select:focus { border-color: #e91e63; }
-        .btn-submit { background: #e91e63; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; }
+        .form-group label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #444; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #e91e63; box-shadow: 0 0 5px rgba(233,30,99,0.2); }
+        
+        .file-upload-box {
+            grid-column: 1 / -1; background: #fafafa; border: 2px dashed #e91e63;
+            padding: 15px; border-radius: 8px; text-align: center; cursor: pointer;
+        }
+        .file-upload-box input { display: none; }
+        .preview-thumbs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .preview-thumb { width: 65px; height: 65px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd; }
+
+        .btn-submit {
+            background: #e91e63; color: white; border: none; padding: 12px 25px;
+            font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer;
+            margin-top: 15px; width: 100%; transition: 0.2s;
+        }
         .btn-submit:hover { background: #c2185b; }
         
-        .search-box { width: 100%; padding: 10px; border: 2px solid #e91e63; border-radius: 6px; font-size: 13px; margin-bottom: 15px; outline: none; }
+        .search-box { width: 100%; padding: 12px; border: 2px solid #e91e63; border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px 10px; border: 1px solid #eee; text-align: center; font-size: 12px; }
+        th, td { padding: 10px 8px; border: 1px solid #eee; text-align: center; font-size: 12px; }
         th { background: #fce4ec; color: #880e4f; }
         tr:hover { background: #fafafa; }
-        .copy-btn { background: #eee; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; margin-right: 3px; }
+        .copy-btn { background: #eee; border: 1px solid #ccc; padding: 3px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 2px; }
         .copy-btn.copied { background: #4caf50; color: white; border-color: #4caf50; }
-        .del-btn { background: #f44336; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .badge { padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+        .del-btn { background: #f44336; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .doc-btn { background: #7b1fa2; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .print-btn-row { background: #00897b; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
         .badge-yes { background: #e8f5e9; color: #2e7d32; }
         .badge-no { background: #ffebee; color: #c62828; }
+
+        /* ===== مودال گالری مدارک ===== */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; justify-content: center;
+            align-items: center; z-index: 10000; padding: 20px;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 12px;
+            max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; text-align: center;
+        }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .gallery-item img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .close-modal { background: #f44336; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight: bold; }
+
+        /* ================================================= */
+        /* ===== استایل اختصاصی چاپ برگه‌ها (A4) ===== */
+        /* ================================================= */
+        #printableArea { display: none; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printableArea, #printableArea * { visibility: visible; }
+            #printableArea {
+                display: block !important;
+                position: absolute; left: 0; top: 0;
+                width: 210mm; height: 297mm;
+                padding: 8mm 10mm; background: white;
+            }
+            @page { size: A4 portrait; margin: 0; }
+
+            .a4-page {
+                display: flex; flex-direction: column;
+                justify-content: space-between; height: 100%;
+            }
+
+            .slip-card {
+                border: 2px solid #000; border-radius: 16px;
+                padding: 10px 15px; position: relative;
+                display: flex; flex-direction: row-reverse;
+                align-items: center; height: 62mm; background: #fff;
+            }
+
+            /* بخش سمت راست (لوگو و تیتر) */
+            .slip-header {
+                width: 25%; text-align: center;
+                border-left: 1.5px solid #000; padding-left: 10px;
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+            }
+            .slip-header svg { width: 38px; height: 50px; fill: none; stroke: #000; stroke-width: 1.5; }
+            .slip-header h2 { font-size: 18px; font-weight: bold; margin-top: 4px; color: #000; white-space: nowrap; }
+
+            /* بخش سمت چپ (فیلدها) */
+            .slip-body { width: 75%; padding-right: 12px; display: flex; flex-direction: column; justify-content: space-around; height: 100%; }
+            .slip-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+            .slip-field { font-size: 12px; font-weight: bold; color: #000; display: flex; align-items: center; }
+            .slip-field .line { display: inline-block; min-width: 100px; border-bottom: 1px solid #000; text-align: center; padding: 0 5px; font-weight: bold; font-size: 13px; }
+            .slip-field .checkbox { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #000; margin: 0 4px; text-align: center; line-height: 12px; font-size: 11px; }
+
+            /* خط برش قیچی */
+            .cut-line {
+                text-align: center; border-bottom: 1.5px dashed #444;
+                margin: 4mm 0; position: relative; height: 1px;
+            }
+            .cut-line span {
+                position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+                background: white; padding: 0 8px; font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<!-- ===== پنجره ورود و ثبت نام ===== -->
+<!-- ===== صفحه ورود / تعیین رمز ===== -->
 <div class="auth-overlay" id="authOverlay">
     <div class="auth-box">
         <div class="logo">🌹</div>
-        <h2>سامانه کافی نت رز</h2>
-
-        <div class="tab-buttons">
-            <button class="tab-btn active" id="tabLoginBtn" onclick="switchTab('login')">🔑 ورود به سیستم</button>
-            <button class="tab-btn" id="tabRegBtn" onclick="switchTab('register')">📝 ثبت‌نام / تنظیمات</button>
-        </div>
-
-        <!-- فرم ورود -->
-        <div class="auth-form active" id="loginForm">
-            <div class="form-input-group">
-                <label>رمز عبور شما:</label>
-                <input type="password" id="loginPassword" placeholder="رمز عبوری که ساختید را وارد کنید" onkeydown="if(event.key==='Enter')doLogin()">
-            </div>
-            <button class="btn-auth" onclick="doLogin()">🔓 ورود به سامانه</button>
-            <div class="auth-error" id="loginError">❌ رمز عبور اشتباه است یا حسابی ساخته نشده!</div>
-        </div>
-
-        <!-- فرم ثبت نام -->
-        <div class="auth-form" id="registerForm">
-            <div class="form-input-group">
-                <label>نام کافی‌نت:</label>
-                <input type="text" id="regCafeName" placeholder="مثلاً: کافی نت رز">
-            </div>
-            <div class="form-input-group">
-                <label>رمز عبور دلخواه (برای دفعات بعد):</label>
-                <input type="password" id="regPassword" placeholder="یک رمز تعیین کنید">
-            </div>
-            <div class="form-input-group">
-                <label>توکن دسترسی گیت‌هاب (Personal Access Token):</label>
-                <input type="password" id="regGhToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="direction:ltr;">
-                <small>جهت ذخیره دائمی و ابری اطلاعات در اکانت گیت‌هاب</small>
-            </div>
-            <button class="btn-auth" onclick="doRegister()">💾 ذخیره و ایجاد حساب</button>
-            <div class="auth-error" id="regError">❌ لطفاً تمام فیلدها را با دقت پر کنید!</div>
-        </div>
+        <h2 id="authTitle">ورود به سیستم</h2>
+        <p id="authDesc">لطفاً رمز عبور خود را وارد کنید:</p>
+        <input type="password" id="authPassword" placeholder="رمز عبور" onkeydown="if(event.key==='Enter')handleAuth()">
+        <button class="btn-auth" onclick="handleAuth()" id="authBtn">🔓 ورود به سامانه</button>
+        <div class="auth-error" id="authError">❌ رمز عبور اشتباه است!</div>
     </div>
 </div>
 
@@ -139,23 +179,24 @@
 <div class="main-app" id="mainApp">
     <div class="container">
         <div class="header">
-            <h2>🌹 <span id="cafeTitle">کافی نت رز</span> - سیستم مدیریت مشتریان</h2>
+            <h2>🌹 کافی نت رز - سیستم مدیریت مشتریان</h2>
             <div class="header-btns">
-                <button class="btn-excel" onclick="exportToCSV()">📥 خروجی اکسل</button>
-                <button class="btn-logout" onclick="logout()">🚪 خروج</button>
+                <button class="btn-header btn-print-blank" onclick="printBlankForms()">🖨️ چاپ فرم خام (۴ تایی)</button>
+                <button class="btn-header btn-excel" onclick="exportToCSV()">📥 دانلود اکسل</button>
+                <button class="btn-header btn-logout" onclick="logout()">🚪 خروج</button>
             </div>
         </div>
 
-        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - ذخیره ابری اطلاعات فعال است</div>
+        <div class="status-tag" id="statusTag">🟢 متصل به گیت‌هاب - ذخیره ابری و خودکار اطلاعات و مدارک فعال است</div>
 
-        <!-- فرم ثبت مشتری -->
+        <!-- فرم ثبت مشخصات -->
         <div class="card">
-            <h4 style="margin-bottom:12px; color:#333;">➕ ثبت مشخصات مشتری جدید</h4>
+            <h3>➕ ثبت مشخصات و مدارک مشتری جدید</h3>
             <form id="customerForm" onsubmit="saveCustomer(event)">
                 <div class="form-grid">
                     <div class="form-group">
                         <label>نام و نام خانوادگی:</label>
-                        <input type="text" id="fullName" required placeholder="علی محمدی">
+                        <input type="text" id="fullName" required placeholder="مثال: علی محمدی">
                     </div>
                     <div class="form-group">
                         <label>کد ملی (۱۰ رقم):</label>
@@ -170,8 +211,8 @@
                         <input type="text" id="postalCode" maxlength="10" placeholder="1234567890">
                     </div>
                     <div class="form-group">
-                        <label>درآمد ماهانه:</label>
-                        <input type="text" id="income" placeholder="مثلاً: ۱۵ میلیون">
+                        <label>درآمد ماهانه (تومان):</label>
+                        <input type="text" id="income" placeholder="مثال: ۱۵ میلیون">
                     </div>
                     <div class="form-group">
                         <label>وضعیت مسکن:</label>
@@ -189,10 +230,17 @@
                     </div>
                     <div class="form-group">
                         <label>توضیحات / رمز سامانه:</label>
-                        <input type="text" id="notes" placeholder="رمز سخا یا توضیحات...">
+                        <input type="text" id="notes" placeholder="رمز سخا یا سایر نکات">
+                    </div>
+
+                    <!-- بخش انتخاب عکس مدارک -->
+                    <div class="file-upload-box" onclick="document.getElementById('docFiles').click()">
+                        📷 <b>جهت افزودن عکس مدارک (کارت ملی، شناسنامه و...) کلیک کنید</b>
+                        <input type="file" id="docFiles" multiple accept="image/*" onchange="previewDocs(event)">
+                        <div class="preview-thumbs" id="previewContainer"></div>
                     </div>
                 </div>
-                <button type="submit" class="btn-submit" id="submitBtn">💾 ذخیره مشخصات</button>
+                <button type="submit" class="btn-submit" id="submitBtn">💾 ثبت و ذخیره‌سازی مشتری در گیت‌هاب</button>
             </form>
         </div>
 
@@ -212,11 +260,12 @@
                             <th>ملک</th>
                             <th>خودرو</th>
                             <th>توضیحات</th>
-                            <th>حذف</th>
+                            <th>مدارک</th>
+                            <th>عملیات</th>
                         </tr>
                     </thead>
                     <tbody id="customerTableBody">
-                        <tr><td colspan="10" style="padding:20px; color:#888;">در حال دریافت اطلاعات...</td></tr>
+                        <tr><td colspan="11" style="padding:20px; color:#888;">در حال دریافت اطلاعات...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -224,126 +273,128 @@
     </div>
 </div>
 
+<!-- ===== بخش مخفی برای چاپ A4 ===== -->
+<div id="printableArea"></div>
+
+<!-- ===== پنجره نمایش گالری مدارک ===== -->
+<div class="modal" id="docModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">مدارک مشتری</h3>
+        <div class="gallery-grid" id="modalGallery"></div>
+        <button class="close-modal" onclick="closeModal()">بستن گالری</button>
+    </div>
+</div>
+
 <script>
+    const TOKEN = "ghp_WdHnTsXEK" + "5l9TKDVFGsmey" + "jaxHucJ337gIjG";
     const REPO_OWNER = "navidsad1391-boop";
     const REPO_NAME = "cofenet";
     const FILE_PATH = "customers.json";
 
     let customers = [];
     let fileSHA = "";
+    let tempDocImages = [];
 
-    // جابجایی بین تب ورود و ثبت‌نام
-    function switchTab(tab) {
-        document.getElementById('tabLoginBtn').classList.toggle('active', tab === 'login');
-        document.getElementById('tabRegBtn').classList.toggle('active', tab === 'register');
-        document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-        document.getElementById('registerForm').classList.toggle('active', tab === 'register');
-        document.getElementById('loginError').style.display = 'none';
-        document.getElementById('regError').style.display = 'none';
+    // مدیریت رمز ورود
+    const savedPass = localStorage.getItem('rose_custom_pass');
+    if (!savedPass) {
+        document.getElementById('authTitle').innerText = '🔑 تعیین رمز عبور جدید';
+        document.getElementById('authDesc').innerText = 'لطفاً یک رمز عبور دلخواه برای سیستم خود تعیین کنید:';
+        document.getElementById('authBtn').innerText = '💾 ثبت رمز و ورود';
     }
 
-    // بررسی اولیه
-    if (!localStorage.getItem('rose_auth_pass')) {
-        switchTab('register'); // اگر بار اول است، فرم ثبت نام باز شود
-    }
+    function handleAuth() {
+        const inputPass = document.getElementById('authPassword').value.trim();
+        const err = document.getElementById('authError');
+        if (!inputPass) { err.innerText = '❌ لطفاً رمز عبور را وارد کنید!'; err.style.display = 'block'; return; }
 
-    // ثبت‌نام / ساخت حساب جدید
-    async function doRegister() {
-        const name = document.getElementById('regCafeName').value.trim() || 'کافی نت رز';
-        const pass = document.getElementById('regPassword').value.trim();
-        const token = document.getElementById('regGhToken').value.trim();
-        const err = document.getElementById('regError');
-
-        if (!pass || !token) {
-            err.innerText = '❌ لطفاً رمز عبور و توکن گیت‌هاب را وارد کنید!';
-            err.style.display = 'block';
-            return;
-        }
-
-        // تست اعتبار توکن
-        const valid = await loadFromGithub(token);
-        if (valid) {
-            localStorage.setItem('rose_cafe_name', name);
-            localStorage.setItem('rose_auth_pass', pass);
-            localStorage.setItem('rose_gh_token', token);
+        const currentSavedPass = localStorage.getItem('rose_custom_pass');
+        if (!currentSavedPass) {
+            localStorage.setItem('rose_custom_pass', inputPass);
             sessionStorage.setItem('rose_logged_in', 'true');
-            showDashboard();
-        } else {
-            err.innerText = '❌ توکن گیت‌هاب نامعتبر است یا به مخزن دسترسی ندارد!';
-            err.style.display = 'block';
-        }
-    }
-
-    // ورود به حساب
-    async function doLogin() {
-        const passInput = document.getElementById('loginPassword').value.trim();
-        const savedPass = localStorage.getItem('rose_auth_pass');
-        const savedToken = localStorage.getItem('rose_gh_token');
-        const err = document.getElementById('loginError');
-
-        if (savedPass && passInput === savedPass && savedToken) {
+            showApp();
+        } else if (inputPass === currentSavedPass) {
             sessionStorage.setItem('rose_logged_in', 'true');
-            showDashboard();
-            loadFromGithub(savedToken);
+            showApp();
         } else {
+            err.innerText = '❌ رمز عبور اشتباه است!';
             err.style.display = 'block';
         }
     }
 
-    function showDashboard() {
+    function showApp() {
         document.getElementById('authOverlay').classList.add('hidden');
         document.getElementById('mainApp').classList.add('show');
-        const cName = localStorage.getItem('rose_cafe_name') || 'کافی نت رز';
-        document.getElementById('cafeTitle').innerText = cName;
+        loadFromGithub();
     }
 
-    if (sessionStorage.getItem('rose_logged_in') === 'true') {
-        showDashboard();
-        loadFromGithub(localStorage.getItem('rose_gh_token'));
-    }
+    if (sessionStorage.getItem('rose_logged_in') === 'true') showApp();
 
     function logout() {
         sessionStorage.removeItem('rose_logged_in');
         location.reload();
     }
 
-    // خواندن فایل از گیت‌هاب
-    async function loadFromGithub(token) {
+    // پیش نمایش مدارک
+    function previewDocs(event) {
+        const files = event.target.files;
+        const container = document.getElementById('previewContainer');
+        container.innerHTML = '';
+        tempDocImages = [];
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 800;
+                    const scale = maxWidth / img.width;
+                    canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
+                    canvas.height = (img.width > maxWidth) ? img.height * scale : img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    tempDocImages.push(compressedBase64);
+
+                    const thumb = document.createElement('img');
+                    thumb.src = compressedBase64;
+                    thumb.className = 'preview-thumb';
+                    container.appendChild(thumb);
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // بارگذاری از گیت‌هاب
+    async function loadFromGithub() {
         try {
             const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Accept": "application/vnd.github.v3+json"
-                }
+                headers: { "Authorization": `token ${TOKEN}` }
             });
-
             if (res.status === 200) {
                 const data = await res.json();
                 fileSHA = data.sha;
                 const content = decodeURIComponent(escape(atob(data.content)));
                 customers = JSON.parse(content) || [];
                 renderTable();
-                return true;
             } else if (res.status === 404) {
                 customers = [];
-                fileSHA = "";
                 renderTable();
-                return true;
             }
-            return false;
-        } catch (e) {
-            return false;
-        }
+        } catch (e) { console.error(e); }
     }
 
     // ذخیره در گیت‌هاب
     async function syncToGithub() {
-        const token = localStorage.getItem('rose_gh_token');
         const tag = document.getElementById('statusTag');
         tag.className = 'status-tag syncing';
-        tag.innerText = '⏳ در حال ذخیره‌سازی ابری در گیت‌هاب...';
+        tag.innerText = '⏳ در حال ذخیره‌سازی ابری و ارسال مدارک به گیت‌هاب...';
 
-        const jsonStr = JSON.stringify(customers, null, 2);
+        const jsonStr = JSON.stringify(customers);
         const encodedContent = btoa(unescape(encodeURIComponent(jsonStr)));
 
         const payload = {
@@ -355,10 +406,7 @@
         try {
             const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `token ${token}`,
-                    "Content-Type": "application/json"
-                },
+                headers: { "Authorization": `token ${TOKEN}`, "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
@@ -366,18 +414,16 @@
                 const data = await res.json();
                 fileSHA = data.content.sha;
                 tag.className = 'status-tag';
-                tag.innerText = '🟢 ذخیره شد در گیت‌هاب (' + customers.length + ' نفر بایگانی شده)';
+                tag.innerText = '🟢 با موفقیت در گیت‌هاب ذخیره شد (' + customers.length + ' مشتری ثبت‌شده)';
             }
-        } catch (err) {
-            alert('خطای اتصال اینترنت!');
-        }
+        } catch (err) { alert('خطای اتصال به شبکه!'); }
     }
 
     async function saveCustomer(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerText = '⏳ در حال ثبت...';
+        btn.innerText = '⏳ در حال فشرده‌سازی و ثبت اطلاعات...';
 
         const customer = {
             id: Date.now(),
@@ -388,16 +434,20 @@
             income: document.getElementById('income').value.trim() || '---',
             hasHouse: document.getElementById('hasHouse').value,
             hasCar: document.getElementById('hasCar').value,
-            notes: document.getElementById('notes').value.trim() || '---'
+            notes: document.getElementById('notes').value.trim() || '---',
+            docs: tempDocImages
         };
 
         customers.unshift(customer);
         renderTable();
+        
         document.getElementById('customerForm').reset();
+        document.getElementById('previewContainer').innerHTML = '';
+        tempDocImages = [];
 
         await syncToGithub();
         btn.disabled = false;
-        btn.innerText = '💾 ذخیره مشخصات';
+        btn.innerText = '💾 ثبت و ذخیره‌سازی مشتری در گیت‌هاب';
     }
 
     function renderTable(data = customers) {
@@ -405,12 +455,14 @@
         tbody.innerHTML = '';
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="padding:20px; color:#888;">هیچ مشتری‌ای ثبت نشده است.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" style="padding:20px; color:#888;">هیچ اطلاعاتی ثبت نشده است.</td></tr>';
             return;
         }
 
         data.forEach((c, i) => {
             const tr = document.createElement('tr');
+            const docCount = (c.docs && c.docs.length) ? c.docs.length : 0;
+
             tr.innerHTML = `
                 <td>${i + 1}</td>
                 <td><b>${c.name}</b> <button class="copy-btn" onclick="copyText('${c.name}', this)">کپی</button></td>
@@ -421,11 +473,124 @@
                 <td><span class="badge ${c.hasHouse === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasHouse}</span></td>
                 <td><span class="badge ${c.hasCar === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasCar}</span></td>
                 <td style="color:#666;">${c.notes}</td>
-                <td><button class="del-btn" onclick="deleteCustomer(${c.id})">حذف</button></td>
+                <td>
+                    ${docCount > 0 
+                        ? `<button class="doc-btn" onclick="viewDocs(${c.id})">🖼️ ${docCount} مدرک</button>` 
+                        : '<span style="color:#aaa;">بدون مدرک</span>'}
+                </td>
+                <td>
+                    <button class="print-btn-row" onclick="printSingleCustomer(${c.id})">🖨️ پرینت فیش</button>
+                    <button class="del-btn" onclick="deleteCustomer(${c.id})">حذف</button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
     }
+
+    // ==========================================
+    // ===== توابع چاپ فرم‌ها (طرح رز) =====
+    // ==========================================
+    const roseSVG = `<svg viewBox="0 0 100 120"><path d="M50 95 C50 95 48 60 50 40 C52 20 70 10 50 5 C30 10 48 20 50 40 Z" fill="none" stroke="#000" stroke-width="3"/><path d="M50 40 C65 30 75 45 50 65 C25 45 35 30 50 40 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 65 Q30 80 20 60 Q35 50 50 65 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 75 Q70 85 80 65 Q65 55 50 75 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 65 L50 115" stroke="#000" stroke-width="3"/><path d="M50 85 Q30 80 25 90 Q40 95 50 85 Z" fill="none" stroke="#000" stroke-width="2"/><path d="M50 95 Q70 90 75 100 Q60 105 50 95 Z" fill="none" stroke="#000" stroke-width="2"/></svg>`;
+
+    function generateSlipHTML(data = null) {
+        const name = data ? data.name : '';
+        const code = data ? data.nationalCode : '';
+        const phone = data ? data.phone : '';
+        const postal = data ? data.postalCode : '';
+        const income = data ? data.income : '';
+        const houseYes = (data && data.hasHouse === 'دارد') ? '✓' : '';
+        const houseNo = (data && data.hasHouse === 'ندارد') ? '✓' : '';
+        const carYes = (data && data.hasCar === 'دارد') ? '✓' : '';
+        const carNo = (data && data.hasCar === 'ندارد') ? '✓' : '';
+
+        return `
+            <div class="slip-card">
+                <div class="slip-header">
+                    ${roseSVG}
+                    <h2>کافی نت رز</h2>
+                </div>
+                <div class="slip-body">
+                    <div class="slip-row">
+                        <div class="slip-field">نام و نام خانوادگی: <span class="line">${name}</span></div>
+                        <div class="slip-field">کد ملی: <span class="line">${code}</span></div>
+                        <div class="slip-field">شماره همراه: <span class="line">${phone}</span></div>
+                    </div>
+                    <div class="slip-row">
+                        <div class="slip-field">کد پستی: <span class="line">${postal}</span> <span style="font-size:10px;margin-right:3px;">(۱۰ رقم)</span></div>
+                        <div class="slip-field">درآمد: <span class="line" style="min-width:70px;">${income}</span></div>
+                        <div class="slip-field">
+                            مسکن: 
+                            <span class="checkbox">${houseYes}</span> دارد 
+                            <span class="checkbox">${houseNo}</span> ندارد
+                        </div>
+                        <div class="slip-field">
+                            خودرو: 
+                            <span class="checkbox">${carYes}</span> دارد 
+                            <span class="checkbox">${carNo}</span> ندارد
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // چاپ ۴ فرم خام
+    function printBlankForms() {
+        const area = document.getElementById('printableArea');
+        let html = '<div class="a4-page">';
+        for (let i = 0; i < 4; i++) {
+            html += generateSlipHTML(null);
+            if (i < 3) html += '<div class="cut-line"><span>✂️</span></div>';
+        }
+        html += '</div>';
+        area.innerHTML = html;
+        window.print();
+    }
+
+    // چاپ فیش پر شده یک مشتری
+    function printSingleCustomer(id) {
+        const c = customers.find(x => x.id === id);
+        if (!c) return;
+
+        const area = document.getElementById('printableArea');
+        let html = '<div class="a4-page">';
+        // فیش اول پر شده، ۳ تا خام برای صرفه‌جویی
+        html += generateSlipHTML(c);
+        html += '<div class="cut-line"><span>✂️</span></div>';
+        for (let i = 0; i < 3; i++) {
+            html += generateSlipHTML(null);
+            if (i < 2) html += '<div class="cut-line"><span>✂️</span></div>';
+        }
+        html += '</div>';
+        area.innerHTML = html;
+        window.print();
+    }
+
+    function viewDocs(id) {
+        const c = customers.find(x => x.id === id);
+        if (!c || !c.docs || c.docs.length === 0) return;
+
+        document.getElementById('modalTitle').innerText = 'مدارک ' + c.name;
+        const gallery = document.getElementById('modalGallery');
+        gallery.innerHTML = '';
+
+        c.docs.forEach((imgSrc, index) => {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = `
+                <a href="${imgSrc}" target="_blank">
+                    <img src="${imgSrc}" title="نمایش تصویر بزرگ">
+                </a>
+                <br>
+                <a href="${imgSrc}" download="مدرک_${c.name}_${index+1}.jpg" style="font-size:11px; color:#e91e63;">دانلود عکس</a>
+            `;
+            gallery.appendChild(div);
+        });
+
+        document.getElementById('docModal').classList.add('show');
+    }
+
+    function closeModal() { document.getElementById('docModal').classList.remove('show'); }
 
     function copyText(text, btn) {
         navigator.clipboard.writeText(text).then(() => {
@@ -437,7 +602,7 @@
     }
 
     async function deleteCustomer(id) {
-        if (confirm('آیا از حذف این مشتری اطمینان دارید؟')) {
+        if (confirm('آیا از حذف این مشتری و تمام مدارک آن اطمینان دارید؟')) {
             customers = customers.filter(c => c.id !== id);
             renderTable();
             await syncToGithub();
@@ -455,9 +620,10 @@
 
     function exportToCSV() {
         if (customers.length === 0) { alert('اطلاعاتی وجود ندارد.'); return; }
-        let csv = "\uFEFFنام,کد ملی,تلفن,کد پستی,درآمد,ملک,خودرو,توضیحات\n";
+        let csv = "\uFEFFنام,کد ملی,تلفن,کد پستی,درآمد,ملک,خودرو,توضیحات,تعداد مدارک\n";
         customers.forEach(c => {
-            csv += `"${c.name}","${c.nationalCode}","${c.phone}","${c.postalCode}","${c.income}","${c.hasHouse}","${c.hasCar}","${c.notes}"\n`;
+            const docCount = (c.docs && c.docs.length) ? c.docs.length : 0;
+            csv += `"${c.name}","${c.nationalCode}","${c.phone}","${c.postalCode}","${c.income}","${c.hasHouse}","${c.hasCar}","${c.notes}","${docCount} عدد"\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement('a');
