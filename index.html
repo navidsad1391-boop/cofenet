@@ -153,4 +153,232 @@
 
         <!-- جدول مشتریان -->
         <div class="card">
-            <input type="text" 
+            <input type="text" id="searchBox" class="search-box" onkeyup="filterCustomers()" placeholder="🔍 جستجو بر اساس نام، کد ملی یا شماره همراه...">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ردیف</th>
+                            <th>نام و نام خانوادگی</th>
+                            <th>کد ملی</th>
+                            <th>شماره تماس</th>
+                            <th>کد پستی</th>
+                            <th>درآمد</th>
+                            <th>ملک</th>
+                            <th>خودرو</th>
+                            <th>توضیحات</th>
+                            <th>حذف</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <tr><td colspan="10" style="padding:20px; color:#888;">در حال بارگذاری اطلاعات از گیت‌هاب...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // اطلاعات مخزن شما در گیت‌هاب
+    const REPO_OWNER = "navidsad1391-boop";
+    const REPO_NAME = "cofenet";
+    const FILE_PATH = "customers.json";
+
+    let customers = [];
+    let fileSHA = "";
+    let GITHUB_TOKEN = localStorage.getItem('rose_gh_token') || "";
+
+    if (GITHUB_TOKEN) {
+        showApp();
+    }
+
+    async function loginWithGithub() {
+        const token = document.getElementById('ghToken').value.trim();
+        if (!token) return;
+
+        GITHUB_TOKEN = token;
+        const success = await loadFromGithub();
+        if (success) {
+            localStorage.setItem('rose_gh_token', token);
+            showApp();
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
+    }
+
+    function showApp() {
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('mainApp').classList.add('show');
+        loadFromGithub();
+    }
+
+    function logout() {
+        localStorage.removeItem('rose_gh_token');
+        location.reload();
+    }
+
+    // خواندن فایل از گیت‌هاب
+    async function loadFromGithub() {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                headers: {
+                    "Authorization": `token ${GITHUB_TOKEN}`,
+                    "Accept": "application/vnd.github.v3+json"
+                }
+            });
+
+            if (res.status === 200) {
+                const data = await res.json();
+                fileSHA = data.sha;
+                const content = decodeURIComponent(escape(atob(data.content)));
+                customers = JSON.parse(content) || [];
+                renderTable();
+                return true;
+            } else if (res.status === 404) {
+                // فایل هنوز وجود ندارد
+                customers = [];
+                fileSHA = "";
+                renderTable();
+                return true;
+            }
+            return false;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    }
+
+    // ذخیره فایل جدید در گیت‌هاب
+    async function syncToGithub() {
+        const tag = document.getElementById('statusTag');
+        tag.className = 'status-tag syncing';
+        tag.innerText = '⏳ در حال همگام‌سازی و ذخیره در گیت‌هاب...';
+
+        const jsonStr = JSON.stringify(customers, null, 2);
+        const encodedContent = btoa(unescape(encodeURIComponent(jsonStr)));
+
+        const payload = {
+            message: `Update customers (${new Date().toLocaleString('fa-IR')})`,
+            content: encodedContent
+        };
+        if (fileSHA) payload.sha = fileSHA;
+
+        try {
+            const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${GITHUB_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                fileSHA = data.content.sha;
+                tag.className = 'status-tag';
+                tag.innerText = '🟢 تمام اطلاعات با موفقیت در گیت‌هاب ذخیره شد (' + customers.length + ' نفر)';
+            } else {
+                alert('خطا در همگام‌سازی با گیت‌هاب!');
+            }
+        } catch (err) {
+            alert('خطای شبکه!');
+        }
+    }
+
+    async function saveCustomer(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = '⏳ در حال ذخیره...';
+
+        const customer = {
+            id: Date.now(),
+            name: document.getElementById('fullName').value.trim(),
+            nationalCode: document.getElementById('nationalCode').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            postalCode: document.getElementById('postalCode').value.trim() || '---',
+            income: document.getElementById('income').value.trim() || '---',
+            hasHouse: document.getElementById('hasHouse').value,
+            hasCar: document.getElementById('hasCar').value,
+            notes: document.getElementById('notes').value.trim() || '---'
+        };
+
+        customers.unshift(customer);
+        renderTable();
+        document.getElementById('customerForm').reset();
+
+        await syncToGithub();
+        btn.disabled = false;
+        btn.innerText = '💾 ذخیره در گیت‌هاب';
+    }
+
+    function renderTable(data = customers) {
+        const tbody = document.getElementById('customerTableBody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="padding:20px; color:#888;">هیچ مشتری ثبت نشده است.</td></tr>';
+            return;
+        }
+
+        data.forEach((c, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td><b>${c.name}</b> <button class="copy-btn" onclick="copyText('${c.name}', this)">کپی</button></td>
+                <td><code>${c.nationalCode}</code> <button class="copy-btn" onclick="copyText('${c.nationalCode}', this)">کپی</button></td>
+                <td><code>${c.phone}</code> <button class="copy-btn" onclick="copyText('${c.phone}', this)">کپی</button></td>
+                <td><code>${c.postalCode}</code> ${c.postalCode !== '---' ? `<button class="copy-btn" onclick="copyText('${c.postalCode}', this)">کپی</button>` : ''}</td>
+                <td>${c.income}</td>
+                <td><span class="badge ${c.hasHouse === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasHouse}</span></td>
+                <td><span class="badge ${c.hasCar === 'دارد' ? 'badge-yes' : 'badge-no'}">${c.hasCar}</span></td>
+                <td style="color:#666;">${c.notes}</td>
+                <td><button class="del-btn" onclick="deleteCustomer(${c.id})">حذف</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.innerText;
+            btn.innerText = '✓';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.innerText = orig; btn.classList.remove('copied'); }, 1000);
+        });
+    }
+
+    async function deleteCustomer(id) {
+        if (confirm('آیا از حذف این مشتری اطمینان دارید؟')) {
+            customers = customers.filter(c => c.id !== id);
+            renderTable();
+            await syncToGithub();
+        }
+    }
+
+    function filterCustomers() {
+        const q = document.getElementById('searchBox').value.toLowerCase();
+        renderTable(customers.filter(c => 
+            c.name.toLowerCase().includes(q) || 
+            c.nationalCode.includes(q) || 
+            c.phone.includes(q)
+        ));
+    }
+
+    function exportToCSV() {
+        if (customers.length === 0) { alert('اطلاعاتی وجود ندارد.'); return; }
+        let csv = "\uFEFFنام,کد ملی,تلفن,کد پستی,درآمد,ملک,خودرو,توضیحات\n";
+        customers.forEach(c => {
+            csv += `"${c.name}","${c.nationalCode}","${c.phone}","${c.postalCode}","${c.income}","${c.hasHouse}","${c.hasCar}","${c.notes}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'مشتریان_کافی_نت_رز.csv';
+        a.click();
+    }
+</script>
+</body>
+</html>
